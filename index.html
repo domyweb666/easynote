@@ -45,9 +45,9 @@ svg{display:block}
 .row:active{filter:brightness(.95)}
 .row .rt{flex:1;font-size:21px;line-height:1.3;word-break:break-word;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.row .rd{flex:none;display:flex;align-items:center;gap:6px;font-size:16px;color:#555;text-align:right;max-width:110px}
+.row .rd{flex:none;display:flex;align-items:center;gap:6px;font-size:16px;color:#555;text-align:right}
 .row .rd svg{width:20px;height:20px;flex:none}
-.row .pin{font-size:14px}
+.row .prog{font-size:13px;color:#777}
 .empty{text-align:center;color:var(--muted);padding:70px 20px;line-height:1.8}
 .fab{position:fixed;right:18px;bottom:calc(var(--safe-b) + 78px);width:62px;height:62px;border-radius:18px;
   background:var(--teal);color:#fff;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:6}
@@ -60,38 +60,59 @@ svg{display:block}
 
 /* ================= NOTE ================= */
 #noteView{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:var(--bg)}
-.nhead{background:var(--hd);display:flex;align-items:center;gap:6px;
-  padding:calc(var(--safe-t) + 6px) 6px 6px 6px;min-height:58px}
-.nhead .ttl{flex:1;min-width:0;font-size:24px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:6px}
-.nhead input{flex:1;min-width:0;font-size:22px;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.2);padding:7px 8px;border-radius:2px}
-.swatch{width:40px;height:40px;border-radius:6px;border:1px solid rgba(0,0,0,.25);background:var(--hd);filter:saturate(1.4) brightness(.92);flex:none;margin:0 6px}
-.nmeta{display:flex;justify-content:space-between;padding:6px 12px;font-size:17px;color:rgba(0,0,0,.55)}
-.nbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.nhead{background:var(--hd);display:flex;align-items:center;gap:4px;
+  padding:calc(var(--safe-t) + 6px) 4px 6px 4px;min-height:58px;flex:none}
+#nTitle{flex:1;min-width:0;font-size:23px;font-weight:500;background:transparent;border:0;padding:8px 6px;border-radius:6px}
+#nTitle:focus{background:rgba(255,255,255,.55)}
+#nTitle::placeholder{color:currentColor;opacity:.45}
+.swatch{width:30px;height:30px;border-radius:7px;border:2px solid rgba(255,255,255,.8);background:var(--hd);
+  filter:saturate(1.5) brightness(.9);flex:none;margin:0 6px;box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.nmeta{display:flex;justify-content:space-between;align-items:center;padding:6px 14px;font-size:15px;color:rgba(0,0,0,.5);flex:none}
+.nbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;position:relative}
 .lined{background-image:repeating-linear-gradient(to bottom, transparent 0, transparent 43px, var(--rule) 43px, var(--rule) 44px);
-  background-attachment:local;line-height:44px;font-size:20px;padding:0 12px;min-height:100%}
-#nText{white-space:pre-wrap;word-break:break-word;padding-bottom:120px}
-#eText{display:block;width:100%;border:0;resize:none;background-color:transparent;min-height:100%;padding-bottom:120px}
-.ci{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--rule);min-height:64px;padding:8px 4px 8px 14px;width:100%;text-align:left}
-.ci .ct{flex:1;font-size:21px;line-height:1.45;word-break:break-word;white-space:pre-wrap}
-.ci.done .ct{text-decoration:line-through;color:rgba(0,0,0,.4)}
-.ci .ck{width:40px;display:grid;place-items:center;color:rgba(0,0,0,.45);flex:none}
-.ci .ck svg{width:28px;height:28px}
-.ci .dots{width:36px;height:44px;display:grid;place-items:center;color:rgba(0,0,0,.45);flex:none}
-.ci .dots svg{width:22px;height:22px}
-.ci input{flex:1;min-width:0;font-size:20px;background:transparent;border:0;padding:6px 0}
-.ci .del{width:40px;height:40px;display:grid;place-items:center;color:rgba(0,0,0,.4);flex:none;font-size:20px}
-.addrow{display:flex;align-items:center;gap:10px;padding:16px 14px;font-size:19px;color:rgba(0,0,0,.5);width:100%}
-.ubar{display:flex;justify-content:center;gap:60px;padding:8px 0 calc(var(--safe-b) + 8px);border-top:1px solid rgba(0,0,0,.12);background:var(--bg)}
-.ubar button{width:56px;height:40px;display:grid;place-items:center;color:rgba(0,0,0,.55)}
-.ubar button:disabled{opacity:.3}
-.ubar svg{width:28px;height:28px}
+  background-attachment:local;line-height:44px;font-size:20px;padding:0 14px;min-height:100%}
+#eText{display:block;width:100%;border:0;resize:none;background-color:transparent;min-height:100%;padding:0 0 160px}
+
+/* --- checklist --- */
+.cl{padding:2px 0 200px}
+.ci{display:flex;align-items:flex-start;gap:4px;padding:0 0 0 6px;position:relative;background:var(--bg);
+  border-bottom:1px solid var(--rule);transition:background .15s}
+.ci.focus{background:rgba(255,255,255,.5)}
+.ci .cb{flex:none;width:44px;height:52px;display:grid;place-items:center}
+.ci .cb i{width:24px;height:24px;border-radius:50%;border:2px solid rgba(0,0,0,.4);display:grid;place-items:center;transition:all .15s}
+.ci.done .cb i{background:rgba(0,0,0,.45);border-color:transparent}
+.ci.done .cb i::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+.ci.ticking .cb i{background:var(--teal);border-color:transparent;transform:scale(1.15)}
+.ci textarea{flex:1;min-width:0;border:0;background:transparent;resize:none;font-size:20px;line-height:1.5;
+  padding:12px 0;height:54px;overflow:hidden;display:block}
+.ci.done textarea{text-decoration:line-through;color:rgba(0,0,0,.42)}
+.ci.ticking textarea{text-decoration:line-through;color:rgba(0,0,0,.42)}
+.ci .x{flex:none;width:40px;height:52px;display:none;place-items:center;color:rgba(0,0,0,.4);font-size:19px}
+.ci.focus .x{display:grid}
+.ci .grip{flex:none;width:40px;height:52px;display:grid;place-items:center;color:rgba(0,0,0,.28);touch-action:none;font-size:20px;letter-spacing:-2px}
+.ci.focus .grip{display:none}
+.ci.dragging{z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.2);background:var(--bg)}
+.addrow{display:flex;align-items:center;gap:4px;width:100%;padding:0 0 0 6px;height:54px;font-size:19px;color:rgba(0,0,0,.45);text-align:left}
+.addrow span:first-child{width:44px;text-align:center;font-size:24px}
+.donehdr{display:flex;align-items:center;gap:8px;width:100%;padding:18px 16px 10px;font-size:15px;color:rgba(0,0,0,.5);text-align:left}
+.donehdr .arr{transition:transform .2s;display:inline-block}
+.donehdr.open .arr{transform:rotate(90deg)}
+.donehdr .clr{margin-left:auto;font-size:14px;text-decoration:underline}
+
+/* keyboard toolbar */
+.kbar{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;align-items:center;gap:6px;
+  padding:6px 10px calc(var(--safe-b) + 6px);background:var(--hd);border-top:1px solid rgba(0,0,0,.1);will-change:transform}
+.kbar button{height:40px;min-width:46px;display:grid;place-items:center;color:rgba(0,0,0,.65);border-radius:10px}
+.kbar button:disabled{opacity:.3}
+.kbar svg{width:26px;height:26px}
+.kbar .sp{flex:1}
+.kbar .done{background:rgba(0,0,0,.75);color:#fff;font-size:16px;padding:0 16px}
 
 /* ================= DIALOG / SHEET ================= */
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px}
 .backdrop.bottom{align-items:flex-end;padding:0}
 .dlg{background:#efefef;border-radius:26px;width:100%;max-width:420px;padding:26px 24px 14px}
-.dlg h3{margin:0 0 18px;font-size:26px;font-weight:500}
-.dlg textarea{width:100%;min-height:110px;border:2px solid var(--teal);border-radius:6px;padding:12px;font-size:19px;line-height:1.6;resize:none;background:#efefef}
+.dlg h3{margin:0 0 18px;font-size:21px;line-height:1.5;font-weight:500}
 .dlg .acts{display:flex;justify-content:flex-end;gap:30px;margin-top:16px}
 .dlg .acts button{color:var(--teal);font-size:19px;padding:10px 6px}
 .sheet{background:#fff;width:100%;border-radius:16px 16px 0 0;padding:8px 0 calc(var(--safe-b) + 8px);max-height:80vh;overflow:auto}
@@ -114,7 +135,7 @@ svg{display:block}
 <!-- ============ LIST ============ -->
 <div id="listView">
   <div class="lhead">
-    <div class="lbar" id="lbar">
+    <div class="lbar">
       <h1 id="lTitle">記事本</h1>
       <input id="q" type="search" class="hidden" placeholder="搜尋筆記" autocomplete="off">
       <button class="ib" id="filterBtn" aria-label="依顏色篩選"><span class="colorgrid" id="cgrid"></span></button>
@@ -135,12 +156,19 @@ svg{display:block}
 
 <!-- ============ NOTE ============ -->
 <div id="noteView" class="hidden">
-  <div class="nhead" id="nhead"></div>
+  <div class="nhead">
+    <button class="ib" id="hBack" aria-label="返回"></button>
+    <input id="nTitle" placeholder="標題" autocomplete="off" enterkeyhint="next">
+    <button class="swatch" id="hColor" aria-label="顏色"></button>
+    <button class="ib" id="hMore" aria-label="更多"></button>
+  </div>
   <div class="nmeta"><span id="mLeft"></span><span id="mRight"></span></div>
   <div class="nbody" id="nbody"></div>
-  <div class="ubar hidden" id="ubar">
+  <div class="kbar hidden" id="kbar">
     <button id="undoBtn" aria-label="復原"></button>
     <button id="redoBtn" aria-label="重做"></button>
+    <div class="sp"></div>
+    <button class="done" id="kDone">完成</button>
   </div>
 </div>
 
@@ -153,7 +181,6 @@ svg{display:block}
 const I = {
   back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5M11 5l-7 7 7 7"/></svg>',
   check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg>',
-  pencil:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm17.7-10.2a1 1 0 0 0 0-1.42l-2.33-2.33a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>',
   dots:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></svg>',
   plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
   notes:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 5v2h8V8H8zm0 4v2h8v-2H8zm0 4v2h5v-2H8zM7 1h2v4H7zm4 0h2v4h-2zm4 0h2v4h-2z"/></svg>',
@@ -182,30 +209,33 @@ const SORTS = {updated:'依修改的時間排序', created:'依建立的時間�
 
 /* ---------------- storage ---------------- */
 const KEY = 'colornotes.v1';
-let state = load();
-let ui = { view:'notes', filter:'all', q:'', searching:false, sort: state.sort || 'updated' };
-let cur = null, editing = false, hist = [], hpos = -1, histTimer = null;
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const p2 = x => String(x).padStart(2,'0');
 
+function fixNote(n){
+  if (!COLORS[n.color]) n.color = n.color==='pink' ? 'red' : 'yellow';
+  n.items = (n.items||[]).map(i => ({ id: i.id || uid(), t: i.t || '', done: !!i.done }));
+  n.title = n.title || ''; n.body = n.body || '';
+  return n;
+}
 function load(){
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && Array.isArray(s.notes)){
-      s.notes.forEach(n => { if (!COLORS[n.color]) n.color = n.color==='pink' ? 'red' : 'yellow'; });
-      return s;
-    }
+    if (s && Array.isArray(s.notes)){ s.notes.forEach(fixNote); return s; }
   } catch(e){}
   return { notes: [], sort:'updated' };
 }
+let state = load();
+let ui = { view:'notes', filter:'all', q:'', searching:false, sort: state.sort || 'updated' };
+let cur = null, hist = [], hpos = -1, histTimer = null;
+
 function save(){
   state.sort = ui.sort;
   try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('儲存失敗：空間不足'); }
 }
 try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
-
-const $ = s => document.querySelector(s);
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const p2 = x => String(x).padStart(2,'0');
 
 function listDate(ts){
   const d = new Date(ts), n = new Date();
@@ -227,18 +257,15 @@ function ago(ts){
   return `${Math.floor(s/86400/365)} 年前`;
 }
 const plain = n => n.type==='text' ? n.body : n.items.map(i=>(i.done?'✓ ':'□ ')+i.t).join('\n');
-const label = n => n.title.trim() || plain(n).split('\n').find(l=>l.trim())?.replace(/^[✓□] /,'') || '（無標題）';
+const label = n => n.title.trim() || (n.type==='text' ? n.body : n.items.map(i=>i.t).join('\n')).split('\n').find(l=>l.trim()) || '（無標題）';
 const isEmpty = n => !n.title.trim() && (n.type==='text' ? !n.body.trim() : n.items.every(i=>!i.t.trim()));
 
 /* ---------------- static icons ---------------- */
-$('#lMore').innerHTML = I.dots;
-$('#fab').innerHTML = I.plus;
-$('#navNotes').innerHTML = I.notes;
-$('#navSearch').innerHTML = I.search;
-$('#navTrash').innerHTML = I.trash;
-$('#navMenu').innerHTML = I.menu;
-$('#undoBtn').innerHTML = I.undo;
-$('#redoBtn').innerHTML = I.redo;
+$('#lMore').innerHTML = I.dots; $('#fab').innerHTML = I.plus;
+$('#navNotes').innerHTML = I.notes; $('#navSearch').innerHTML = I.search;
+$('#navTrash').innerHTML = I.trash; $('#navMenu').innerHTML = I.menu;
+$('#hBack').innerHTML = I.back; $('#hMore').innerHTML = I.dots;
+$('#undoBtn').innerHTML = I.undo; $('#redoBtn').innerHTML = I.redo;
 
 /* ================= LIST ================= */
 function renderList(){
@@ -278,9 +305,11 @@ function renderList(){
   }
   el.innerHTML = notes.map(n => {
     const c = col(n.color);
+    const items = n.items.filter(i=>i.t.trim());
+    const prog = n.type==='check' && items.length ? `<span class="prog">${items.filter(i=>i.done).length}/${items.length}</span>` : '';
     return `<button class="row" data-id="${n.id}" style="background:${c.bg};border-left-color:${c.hd}">
       <span class="rt">${esc(label(n))}</span>
-      <span class="rd">${n.pinned?'<span class="pin">📌</span>':''}${n.type==='check'?I.check:''}<span>${listDate(n.updated)}</span></span>
+      <span class="rd">${n.pinned?'📌':''}${prog}${n.type==='check'?I.check:''}<span>${listDate(n.updated)}</span></span>
     </button>`;
   }).join('');
 }
@@ -293,7 +322,7 @@ $('#list').onclick = e => {
       {label:'還原', fn:()=>{ n.deleted=false; save(); renderList(); toast('已還原'); }},
       {label:'永久刪除', danger:true, fn:()=>{ state.notes=state.notes.filter(x=>x!==n); save(); renderList(); }},
     ], label(n));
-  } else openNote(n, false);
+  } else openNote(n);
 };
 $('#fab').onclick = () => sheet([
   {label:'文字', fn:()=>newNote('text')},
@@ -307,7 +336,6 @@ $('#filterBtn').onclick = () => sheet([
   ...CKEYS.map(k=>({ label:col(k).name+'色', dot:col(k).hd, on:ui.filter===k, fn:()=>{ ui.filter=k; renderList(); } }))
 ], '依顏色篩選');
 $('#q').addEventListener('input', e => { ui.q = e.target.value; renderList(); });
-
 $('#navNotes').onclick = () => { ui.view='notes'; ui.searching=false; ui.q=''; $('#q').value=''; renderList(); scrollTo(0,0); };
 $('#navSearch').onclick = () => {
   ui.searching = !ui.searching;
@@ -333,202 +361,303 @@ $('#navMenu').onclick = $('#lMore').onclick = () => {
 
 /* ================= NOTE ================= */
 function newNote(type){
-  const n = { id:uid(), type, title:'', body:'', items:[], color: ui.filter!=='all' ? ui.filter : 'yellow',
-    pinned:false, deleted:false, created:Date.now(), updated:Date.now() };
+  const n = { id:uid(), type, title:'', body:'', items: type==='check' ? [{id:uid(),t:'',done:false}] : [],
+    color: ui.filter!=='all' ? ui.filter : 'yellow', pinned:false, deleted:false, showDone:false,
+    created:Date.now(), updated:Date.now() };
   state.notes.push(n);
-  openNote(n, true);
+  openNote(n);
+  setTimeout(() => {
+    if (type==='text') $('#eText').focus();
+    else focusItem(n.items[0].id, 0);
+  }, 80);
 }
-function openNote(n, edit){
-  cur = n; editing = edit;
+function openNote(n){
+  cur = n;
   hist = []; hpos = -1; snapshot(true);
   $('#noteView').classList.remove('hidden');
-  paint();
-  if (edit) focusFirst();
+  $('#nTitle').value = n.title;
+  setTheme(); paintMeta(); paintBody();
 }
 function setTheme(){
   const c = col(cur.color), v = $('#noteView').style;
   v.setProperty('--bg', c.bg); v.setProperty('--hd', c.hd); v.setProperty('--rule', c.rule);
   document.querySelector('meta[name=theme-color]').content = c.hd;
-  $('#nhead').style.color = cur.color==='black' ? '#fff' : '#1f1f1f';
-}
-function paint(){
-  setTheme();
-  const h = $('#nhead');
-  if (editing){
-    h.innerHTML = `<button class="ib" id="hDone" aria-label="完成">${I.check}</button>
-      <input id="eTitle" placeholder="標題" autocomplete="off" value="${esc(cur.title)}">
-      <button class="swatch" id="hColor" aria-label="顏色"></button>
-      <button class="ib" id="hMore" aria-label="更多">${I.dots}</button>`;
-    $('#eTitle').addEventListener('input', e => { cur.title = e.target.value; changed(); });
-    $('#eTitle').addEventListener('keydown', e => { if (e.key==='Enter'){ e.preventDefault(); focusFirst(true); } });
-    $('#hDone').onclick = () => finishEdit();
-    $('#hColor').onclick = pickColor;
-  } else {
-    h.innerHTML = `<button class="ib" id="hBack" aria-label="返回">${I.back}</button>
-      <div class="ttl">${esc(cur.title || '（無標題）')}</div>
-      <button class="ib" id="hEdit" aria-label="編輯">${I.pencil}</button>
-      <button class="ib" id="hMore" aria-label="更多">${I.dots}</button>`;
-    $('#hBack').onclick = closeNote;
-    $('#hEdit').onclick = () => { editing = true; paint(); focusFirst(); };
-  }
-  $('#hMore').onclick = noteMenu;
-  paintMeta();
-  paintBody();
-  $('#ubar').classList.toggle('hidden', !editing);
-  updUndo();
+  $('.nhead').style.color = cur.color==='black' ? '#fff' : '#1f1f1f';
 }
 function paintMeta(){
-  $('#mLeft').textContent = editing ? '編輯中' : ago(cur.updated);
+  let left = ago(cur.updated);
+  if (cur.type==='check'){
+    const it = cur.items.filter(i=>i.t.trim());
+    if (it.length) left = `完成 ${it.filter(i=>i.done).length} / ${it.length}　·　${left}`;
+  }
+  $('#mLeft').textContent = left;
   $('#mRight').textContent = fullDate(cur.updated);
 }
-function paintBody(keepFocus){
+function paintBody(){
   const b = $('#nbody');
   if (cur.type === 'text'){
-    if (editing){
-      if (!$('#eText')){
-        b.innerHTML = `<div class="lined"><textarea id="eText" placeholder=""></textarea></div>`;
-        const t = $('#eText');
-        t.addEventListener('input', () => { cur.body = t.value; sizeText(); changed(); });
-      }
-      $('#eText').value = cur.body; sizeText();
-    } else {
-      b.innerHTML = `<div class="lined" id="nText">${esc(cur.body) || '<span style="opacity:.4">點兩下開始編輯</span>'}</div>`;
-      $('#nText').ondblclick = () => { editing = true; paint(); focusFirst(); };
-    }
+    b.innerHTML = `<div class="lined"><textarea id="eText" placeholder="開始輸入…"></textarea></div>`;
+    const t = $('#eText'); t.value = cur.body;
+    t.addEventListener('input', () => { cur.body = t.value; sizeText(); changed(); });
+    sizeText();
     return;
   }
-  // checklist
-  if (editing){
-    b.innerHTML = cur.items.map((it,i)=>`<div class="ci ${it.done?'done':''}" data-i="${i}">
-        <input value="${esc(it.t)}" enterkeyhint="next" placeholder="項目">
-        <button class="del" aria-label="刪除項目">✕</button></div>`).join('')
-      + `<button class="addrow" id="addItem">${'＋'} 新增項目</button>`;
-  } else {
-    b.innerHTML = (cur.items.length ? cur.items.map((it,i)=>`<div class="ci ${it.done?'done':''}" data-i="${i}">
-        <span class="ct">${esc(it.t)}</span>
-        ${it.done ? `<span class="ck">${I.check}</span>` : `<button class="dots" aria-label="項目選單">${I.dots}</button>`}
-      </div>`).join('') : `<div class="ci"><span class="ct" style="opacity:.4">還沒有項目，點右上鉛筆新增</span></div>`)
-      + `<div style="height:120px"></div>`;
-  }
+  renderChecklist();
 }
 function sizeText(){
   const t = $('#eText'); if (!t) return;
   t.style.height = 'auto';
   t.style.height = Math.max(t.scrollHeight, $('#nbody').clientHeight) + 'px';
 }
-function focusFirst(fromTitle){
-  setTimeout(() => {
-    if (!fromTitle && !cur.title && cur.type==='check' && !cur.items.length){ $('#eTitle')?.focus(); return; }
-    if (cur.type==='text'){ const t=$('#eText'); t.focus(); t.setSelectionRange(t.value.length,t.value.length); }
-    else {
-      if (!cur.items.length || fromTitle && !cur.items.length){ addItem(cur.items.length); return; }
-      const ins = $('#nbody').querySelectorAll('.ci input'); if (ins.length) ins[ins.length-1].focus();
-      else if (!cur.title) $('#eTitle')?.focus();
-    }
-  }, 60);
+
+/* ---------- checklist ---------- */
+function itemHTML(it){
+  return `<div class="ci ${it.done?'done':''}" data-id="${it.id}">
+    <button class="cb" aria-label="${it.done?'取消勾選':'勾選'}"><i></i></button>
+    <textarea rows="1" enterkeyhint="next" placeholder="${it.done?'':'輸入項目'}">${esc(it.t)}</textarea>
+    <button class="x" aria-label="刪除項目">✕</button>
+    ${it.done ? '' : '<span class="grip" aria-label="拖曳排序">⋮⋮</span>'}
+  </div>`;
+}
+function renderChecklist(){
+  const open = cur.items.filter(i=>!i.done), done = cur.items.filter(i=>i.done);
+  let h = `<div class="cl" id="cl">` + open.map(itemHTML).join('')
+    + `<button class="addrow" id="addItem"><span>＋</span><span>新增項目</span></button>`;
+  if (done.length){
+    h += `<div class="donehdr ${cur.showDone?'open':''}" id="doneHdr"><span class="arr">▸</span><span>已完成 ${done.length} 項</span>
+      ${cur.showDone ? '<button class="clr" id="clrDone">全部刪除</button>' : ''}</div>`;
+    if (cur.showDone) h += done.map(itemHTML).join('');
+  }
+  $('#nbody').innerHTML = h + `</div>`;
+  $('#nbody').querySelectorAll('.ci textarea').forEach(sizeTA);
+}
+function sizeTA(t){ t.style.height = '0px'; t.style.height = Math.max(54, t.scrollHeight) + 'px'; }
+const findItem = id => cur.items.findIndex(i=>i.id===id);
+function focusItem(id, caret){
+  const t = $(`#nbody .ci[data-id="${id}"] textarea`); if (!t) return;
+  t.focus();
+  const p = caret == null ? t.value.length : caret;
+  try { t.setSelectionRange(p,p); } catch(e){}
+  t.closest('.ci').scrollIntoView({block:'nearest'});
+}
+function insertAfter(id, text='', focus=true){
+  const n = {id:uid(), t:text, done:false};
+  const idx = id == null ? -1 : findItem(id);
+  if (idx < 0){ // append after last open item
+    let last = -1; cur.items.forEach((it,k)=>{ if(!it.done) last = k; });
+    cur.items.splice(last+1, 0, n);
+  } else cur.items.splice(idx+1, 0, n);
+  changed(); renderChecklist();
+  if (focus) focusItem(n.id, 0);
+  return n;
 }
 
-/* --- checklist interactions --- */
 $('#nbody').addEventListener('click', e => {
-  if (cur.type !== 'check') return;
-  if (e.target.closest('#addItem')) return addItem(cur.items.length);
-  const row = e.target.closest('.ci[data-i]'); if (!row) return;
-  const i = +row.dataset.i;
-  if (editing){
-    if (e.target.closest('.del')){
-      const removed = cur.items.splice(i,1)[0]; changed(); paintBody();
-      toast('已刪除項目', {label:'復原', fn:()=>{ if(cur){ cur.items.splice(i,0,removed); changed(); paintBody(); } }});
-    }
+  if (!cur || cur.type!=='check') return;
+  if (e.target.closest('#addItem')) return insertAfter(null);
+  if (e.target.closest('#clrDone')){
+    e.stopPropagation();
+    return confirmDlg('刪除所有已完成項目？', () => { cur.items = cur.items.filter(i=>!i.done); changed(true); renderChecklist(); paintMeta(); });
+  }
+  if (e.target.closest('#doneHdr')){ cur.showDone = !cur.showDone; save(); return renderChecklist(); }
+  const row = e.target.closest('.ci'); if (!row) return;
+  const id = row.dataset.id, it = cur.items[findItem(id)];
+  if (e.target.closest('.cb')){
+    if (!it.t.trim() && !it.done) return;
+    if (!it.done){
+      row.classList.add('ticking');
+      document.activeElement?.blur();
+      setTimeout(() => { it.done = true; changed(true); renderChecklist(); paintMeta(); }, 260);
+    } else { it.done = false; changed(true); renderChecklist(); paintMeta(); }
     return;
   }
-  if (e.target.closest('.dots')) return itemMenu(i);
-  cur.items[i].done = !cur.items[i].done; touch(); paintBody(); paintMeta();
-});
-$('#nbody').addEventListener('input', e => {
-  const row = e.target.closest('.ci[data-i]'); if (!row || !editing) return;
-  cur.items[+row.dataset.i].t = e.target.value; changed();
-});
-$('#nbody').addEventListener('keydown', e => {
-  const row = e.target.closest('.ci[data-i]'); if (!row || e.target.tagName!=='INPUT') return;
-  const i = +row.dataset.i, inp = e.target;
-  if (e.key==='Enter' && !e.isComposing){
-    e.preventDefault();
-    if (!inp.value.trim() && i===cur.items.length-1){ inp.blur(); return; }
-    const pos = inp.selectionStart, after = inp.value.slice(pos);
-    cur.items[i].t = inp.value.slice(0,pos);
-    addItem(i+1, after);
-  } else if (e.key==='Backspace' && !inp.value && cur.items.length>1){
-    e.preventDefault(); cur.items.splice(i,1); changed(); paintBody();
-    const ins = $('#nbody').querySelectorAll('.ci input'); ins[Math.max(0,i-1)]?.focus();
+  if (e.target.closest('.x')){
+    const idx = findItem(id), removed = cur.items.splice(idx,1)[0];
+    changed(true); renderChecklist(); paintMeta();
+    const next = cur.items[idx] && !cur.items[idx].done ? cur.items[idx] : cur.items.filter(i=>!i.done).pop();
+    if (next) focusItem(next.id);
+    toast('已刪除項目', {label:'復原', fn:()=>{ if(cur){ cur.items.splice(idx,0,removed); changed(true); renderChecklist(); paintMeta(); } }});
   }
 });
-function addItem(pos, text=''){
-  cur.items.splice(pos,0,{t:text,done:false}); changed(); paintBody();
-  const inp = $(`#nbody .ci[data-i="${pos}"] input`);
-  if (inp){ inp.focus(); inp.setSelectionRange(0,0); inp.scrollIntoView({block:'nearest'}); }
-}
-function itemMenu(i){
-  sheet([
-    {label:'編輯', fn:()=>editItemDlg(i)},
-    {label:'在下方插入項目', fn:()=>editItemDlg(i, true)},
-    {label:'刪除', danger:true, fn:()=>{
-      const removed = cur.items.splice(i,1)[0]; touch(); paintBody();
-      toast('已刪除項目', {label:'復原', fn:()=>{ if(cur){ cur.items.splice(i,0,removed); touch(); paintBody(); } }});
-    }},
-  ]);
-}
-function editItemDlg(i, insert){
-  dialog(insert ? '新增項目' : '編輯', insert ? '' : cur.items[i].t, v => {
-    if (insert){ if (v.trim()) cur.items.splice(i+1,0,{t:v,done:false}); }
-    else if (v.trim()) cur.items[i].t = v; else cur.items.splice(i,1);
-    touch(); paintBody(); paintMeta();
-  });
+// tap empty space under the list = new item
+$('#nbody').addEventListener('click', e => {
+  if (!cur || cur.type!=='check') return;
+  if (e.target.id === 'cl' || e.target.id === 'nbody'){
+    const last = cur.items.filter(i=>!i.done).pop();
+    if (last && !last.t.trim()) focusItem(last.id); else insertAfter(null);
+  }
+});
+$('#nbody').addEventListener('input', e => {
+  const row = e.target.closest('.ci'); if (!row || !cur) return;
+  const it = cur.items[findItem(row.dataset.id)]; it.t = e.target.value;
+  sizeTA(e.target); changed();
+});
+$('#nbody').addEventListener('keydown', e => {
+  const row = e.target.closest('.ci'); if (!row || e.target.tagName!=='TEXTAREA') return;
+  if (e.isComposing || e.keyCode === 229) return;
+  const id = row.dataset.id, idx = findItem(id), it = cur.items[idx], ta = e.target;
+  if (e.key === 'Enter'){
+    e.preventDefault();
+    if (it.done) { ta.blur(); return; }
+    if (!ta.value.trim()){ ta.blur(); return; }          // Enter on empty line = stop
+    const pos = ta.selectionStart;
+    const after = ta.value.slice(pos);
+    it.t = ta.value.slice(0,pos);
+    insertAfter(id, after);
+  } else if (e.key === 'Backspace' && ta.selectionStart === 0 && ta.selectionEnd === 0 && !it.done){
+    const openIdx = cur.items.map((x,k)=>x.done?-1:k).filter(k=>k>=0);
+    const p = openIdx.indexOf(idx);
+    if (p > 0){
+      e.preventDefault();
+      const prev = cur.items[openIdx[p-1]], caret = prev.t.length;
+      prev.t += it.t; cur.items.splice(idx,1);
+      changed(true); renderChecklist(); focusItem(prev.id, caret);
+    }
+  }
+});
+// paste multiple lines → multiple items
+$('#nbody').addEventListener('paste', e => {
+  const row = e.target.closest('.ci'); if (!row) return;
+  const txt = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+  if (!txt.includes('\n')) return;
+  e.preventDefault();
+  const lines = txt.split(/\r?\n/).map(s=>s.replace(/^\s*([-*•□☐✓☑]|\d+[.)、])\s*/,'').trim()).filter(Boolean);
+  const ta = e.target, id = row.dataset.id, it = cur.items[findItem(id)];
+  const before = ta.value.slice(0, ta.selectionStart), after = ta.value.slice(ta.selectionEnd);
+  it.t = before + lines[0];
+  let prevId = id;
+  for (let k=1;k<lines.length;k++){
+    const n = {id:uid(), t:lines[k], done:false};
+    cur.items.splice(findItem(prevId)+1, 0, n); prevId = n.id;
+  }
+  cur.items[findItem(prevId)].t += after;
+  changed(true); renderChecklist(); paintMeta(); focusItem(prevId, cur.items[findItem(prevId)].t.length - after.length);
+});
+// focus highlight + keyboard bar
+document.addEventListener('focusin', e => {
+  document.querySelectorAll('.ci.focus').forEach(r=>r.classList.remove('focus'));
+  const r = e.target.closest && e.target.closest('.ci'); if (r) r.classList.add('focus');
+  if (cur && (e.target.tagName==='TEXTAREA' || e.target.id==='nTitle')) showKbar(true);
+});
+document.addEventListener('focusout', () => {
+  setTimeout(() => {
+    const a = document.activeElement;
+    if (!a || !(a.tagName==='TEXTAREA' || a.tagName==='INPUT')){
+      document.querySelectorAll('.ci.focus').forEach(r=>r.classList.remove('focus'));
+      showKbar(false);
+      if (cur && cur.type==='check') cleanupEmpty();
+    }
+  }, 120);
+});
+function cleanupEmpty(){
+  const before = cur.items.length;
+  const keep = cur.items.filter(i => i.t.trim());
+  if (keep.length !== before && keep.length > 0){ cur.items = keep; save(); renderChecklist(); }
 }
 
-/* --- undo / redo (edit mode) --- */
+/* ---------- drag to reorder (open items) ---------- */
+let drag = null;
+$('#nbody').addEventListener('pointerdown', e => {
+  const g = e.target.closest('.grip'); if (!g) return;
+  e.preventDefault();
+  const row = g.closest('.ci');
+  const rows = [...$('#nbody').querySelectorAll('.ci:not(.done)')];
+  drag = { row, rows, startY: e.clientY, idx: rows.indexOf(row), to: rows.indexOf(row),
+    h: row.offsetHeight, mids: rows.map(r => { const b = r.getBoundingClientRect(); return b.top + b.height/2; }) };
+  row.classList.add('dragging'); g.setPointerCapture(e.pointerId);
+});
+$('#nbody').addEventListener('pointermove', e => {
+  if (!drag) return;
+  const dy = e.clientY - drag.startY, y = drag.mids[drag.idx] + dy;
+  drag.to = drag.mids.filter((m,k) => k !== drag.idx && m < y).length;
+  drag.row.style.transform = `translateY(${dy}px)`;
+  drag.rows.forEach((r,k) => {
+    if (r === drag.row) return;
+    let s = 0;
+    if (drag.idx < drag.to && k > drag.idx && k <= drag.to) s = -drag.h;
+    if (drag.idx > drag.to && k < drag.idx && k >= drag.to) s = drag.h;
+    r.style.transition = 'transform .15s'; r.style.transform = s ? `translateY(${s}px)` : '';
+  });
+});
+function endDrag(){
+  if (!drag) return;
+  const { rows, idx, to } = drag; drag = null;
+  if (idx !== to){
+    const order = rows.map(r => r.dataset.id);
+    const [m] = order.splice(idx,1); order.splice(to,0,m);
+    const openItems = order.map(id => cur.items[findItem(id)]);
+    let k = 0; cur.items = cur.items.map(it => it.done ? it : openItems[k++]);
+    changed(true);
+  }
+  renderChecklist();
+}
+$('#nbody').addEventListener('pointerup', endDrag);
+$('#nbody').addEventListener('pointercancel', endDrag);
+
+/* ---------- title ---------- */
+$('#nTitle').addEventListener('input', e => { cur.title = e.target.value; changed(); });
+$('#nTitle').addEventListener('keydown', e => {
+  if (e.key !== 'Enter' || e.isComposing || e.keyCode===229) return;
+  e.preventDefault();
+  if (cur.type==='text'){ const t=$('#eText'); t.focus(); t.setSelectionRange(0,0); }
+  else { const first = cur.items.find(i=>!i.done); first ? focusItem(first.id) : insertAfter(null); }
+});
+
+/* ---------- keyboard bar (follows the iOS keyboard) ---------- */
+function showKbar(on){
+  $('#kbar').classList.toggle('hidden', !on);
+  if (on) placeKbar();
+}
+function placeKbar(){
+  const vv = window.visualViewport; if (!vv) return;
+  const off = window.innerHeight - vv.height - vv.offsetTop;
+  $('#kbar').style.transform = off > 0 ? `translateY(${-off}px)` : '';
+  $('#kbar').style.paddingBottom = off > 40 ? '6px' : '';
+}
+window.visualViewport?.addEventListener('resize', placeKbar);
+window.visualViewport?.addEventListener('scroll', placeKbar);
+$('#kDone').addEventListener('pointerdown', e => e.preventDefault());
+$('#kDone').onclick = () => document.activeElement?.blur();
+
+/* ---------- undo / redo ---------- */
 const snap = () => JSON.stringify({title:cur.title, body:cur.body, items:cur.items, type:cur.type});
 function snapshot(force){
   const s = snap();
   if (!force && hist[hpos] === s) return;
   hist = hist.slice(0, hpos+1); hist.push(s); if (hist.length>200) hist.shift(); hpos = hist.length-1; updUndo();
 }
-function changed(){
+function changed(now){
   touch();
-  clearTimeout(histTimer); histTimer = setTimeout(()=>snapshot(), 450);
-  $('#undoBtn').disabled = false;
+  clearTimeout(histTimer);
+  if (now) snapshot(); else { histTimer = setTimeout(()=>snapshot(), 450); $('#undoBtn').disabled = false; }
 }
 function restore(s){
-  const o = JSON.parse(s);
-  Object.assign(cur, o); cur.updated = Date.now(); save();
-  $('#eTitle') && ($('#eTitle').value = cur.title);
-  paintBody(); updUndo();
+  const o = JSON.parse(s); Object.assign(cur, o); cur.updated = Date.now(); save();
+  $('#nTitle').value = cur.title; paintBody(); paintMeta(); updUndo();
 }
+['undoBtn','redoBtn'].forEach(id => $('#'+id).addEventListener('pointerdown', e => e.preventDefault()));
 $('#undoBtn').onclick = () => { clearTimeout(histTimer); snapshot(); if (hpos>0){ hpos--; restore(hist[hpos]); } };
 $('#redoBtn').onclick = () => { if (hpos<hist.length-1){ hpos++; restore(hist[hpos]); } };
 function updUndo(){ $('#undoBtn').disabled = hpos<=0; $('#redoBtn').disabled = hpos>=hist.length-1; }
+function touch(){ cur.updated = Date.now(); save(); paintMeta(); }
 
-function touch(){ cur.updated = Date.now(); save(); }
-
-function finishEdit(){
-  document.activeElement?.blur();
-  if (cur.type==='check'){ const before = cur.items.length; cur.items = cur.items.filter(i=>i.t.trim()); if (cur.items.length!==before) save(); }
-  if (isEmpty(cur)){ closeNote(); return; }
-  editing = false; paint();
-}
+/* ---------- note header actions ---------- */
 function closeNote(){
   if (!cur) return;
   document.activeElement?.blur();
   clearTimeout(histTimer);
   if (cur.type==='check') cur.items = cur.items.filter(i=>i.t.trim());
   if (isEmpty(cur)) state.notes = state.notes.filter(n=>n!==cur);
-  save(); cur = null; editing = false;
-  $('#noteView').classList.add('hidden');
+  save(); cur = null;
+  $('#noteView').classList.add('hidden'); $('#kbar').classList.add('hidden');
   $('#nbody').innerHTML = '';
   document.querySelector('meta[name=theme-color]').content = '#f2f2f2';
   renderList();
 }
-
+$('#hBack').onclick = closeNote;
+$('#hColor').onclick = pickColor;
 function pickColor(){
+  document.activeElement?.blur();
   const host = overlay(`<div class="backdrop bottom"><div class="sheet"><h4>選擇顏色</h4>
     <div class="palette">${CKEYS.map(k=>`<button data-c="${k}" class="${cur.color===k?'on':''}" style="background:${col(k).hd}" aria-label="${col(k).name}"></button>`).join('')}</div></div></div>`);
   host.onclick = e => {
@@ -537,15 +666,14 @@ function pickColor(){
     cur.color = c; touch(); setTheme(); closeOverlay();
   };
 }
-function noteMenu(){
+$('#hMore').onclick = () => {
+  document.activeElement?.blur();
   const rows = [];
-  if (!editing) rows.push({label:'編輯', fn:()=>{ editing=true; paint(); focusFirst(); }});
-  rows.push({label:'顏色', fn:pickColor});
   rows.push({label: cur.pinned ? '取消釘選' : '釘選到最上方', fn:()=>{ cur.pinned=!cur.pinned; touch(); toast(cur.pinned?'已釘選':'已取消釘選'); }});
-  rows.push({label: cur.type==='text' ? '轉為清單' : '轉為文字', fn:convert});
+  rows.push({label: cur.type==='text' ? '轉為清單（每行一項）' : '轉為文字', fn:convert});
   if (cur.type==='check' && cur.items.some(i=>i.done)){
-    rows.push({label:'全部取消勾選', fn:()=>{ cur.items.forEach(i=>i.done=false); touch(); paintBody(); }});
-    rows.push({label:'刪除已勾選項目', fn:()=>{ cur.items = cur.items.filter(i=>!i.done); touch(); paintBody(); }});
+    rows.push({label:'全部取消勾選', fn:()=>{ cur.items.forEach(i=>i.done=false); changed(true); renderChecklist(); paintMeta(); }});
+    rows.push({label:'刪除已完成項目', fn:()=>{ cur.items = cur.items.filter(i=>!i.done); changed(true); renderChecklist(); paintMeta(); }});
   }
   rows.push({label:'分享', fn:()=>{
     const txt = (cur.title ? cur.title+'\n\n' : '') + plain(cur);
@@ -556,25 +684,28 @@ function noteMenu(){
     navigator.clipboard?.writeText((cur.title ? cur.title+'\n\n' : '') + plain(cur)).then(()=>toast('已複製'), ()=>toast('複製失敗'));
   }});
   rows.push({label:'刪除', danger:true, fn:()=>{
-    const n = cur; n.deleted = true; n.pinned = false; touch();
-    if (isEmpty(n)) state.notes = state.notes.filter(x=>x!==n);
-    cur = null; editing = false;
-    $('#noteView').classList.add('hidden'); $('#nbody').innerHTML='';
+    const n = cur; n.deleted = true; n.pinned = false;
+    if (n.type==='check') n.items = n.items.filter(i=>i.t.trim());
+    const empty = isEmpty(n);
+    if (empty) state.notes = state.notes.filter(x=>x!==n);
+    cur = null; save();
+    $('#noteView').classList.add('hidden'); $('#kbar').classList.add('hidden'); $('#nbody').innerHTML='';
     document.querySelector('meta[name=theme-color]').content = '#f2f2f2';
-    save(); renderList();
-    toast('已移到垃圾桶', {label:'復原', fn:()=>{ n.deleted=false; if(!state.notes.includes(n)) state.notes.push(n); save(); renderList(); }});
+    renderList();
+    if (!empty) toast('已移到垃圾桶', {label:'復原', fn:()=>{ n.deleted=false; save(); renderList(); }});
   }});
   sheet(rows);
-}
+};
 function convert(){
   if (cur.type==='text'){
-    cur.items = cur.body.split('\n').map(s=>s.trim()).filter(Boolean).map(t=>({t,done:false}));
+    cur.items = cur.body.split('\n').map(s=>s.trim()).filter(Boolean).map(t=>({id:uid(),t,done:false}));
+    if (!cur.items.length) cur.items = [{id:uid(),t:'',done:false}];
     cur.type = 'check';
   } else {
-    cur.body = cur.items.map(i=>i.t).join('\n');
+    cur.body = cur.items.filter(i=>i.t.trim()).map(i=>i.t).join('\n');
     cur.type = 'text';
   }
-  touch(); snapshot(); $('#nbody').innerHTML=''; paintBody();
+  changed(true); paintBody(); paintMeta();
   toast(cur.type==='check' ? '已轉為清單' : '已轉為文字');
 }
 
@@ -592,16 +723,8 @@ function sheet(rows, title){
     closeOverlay(); rows[+b.dataset.i].fn();
   };
 }
-function dialog(title, value, onOk){
-  const el = overlay(`<div class="backdrop"><div class="dlg"><h3>${esc(title)}</h3>
-    <textarea id="dlgText">${esc(value)}</textarea>
-    <div class="acts"><button id="dlgNo">取消</button><button id="dlgOk">確定</button></div></div></div>`);
-  const t = $('#dlgText'); setTimeout(()=>{ t.focus(); t.setSelectionRange(t.value.length,t.value.length); }, 50);
-  $('#dlgNo').onclick = closeOverlay;
-  $('#dlgOk').onclick = () => { const v = t.value; closeOverlay(); onOk(v); };
-}
 function confirmDlg(msg, onOk){
-  const el = overlay(`<div class="backdrop"><div class="dlg"><h3 style="font-size:21px;line-height:1.5">${esc(msg)}</h3>
+  overlay(`<div class="backdrop"><div class="dlg"><h3>${esc(msg)}</h3>
     <div class="acts"><button id="dlgNo">取消</button><button id="dlgOk" style="color:#d0443a">刪除</button></div></div></div>`);
   $('#dlgNo').onclick = closeOverlay;
   $('#dlgOk').onclick = () => { closeOverlay(); onOk(); };
@@ -629,16 +752,15 @@ $('#importFile').onchange = async e => {
   try {
     const data = JSON.parse(await f.text()); if (!Array.isArray(data.notes)) throw 0;
     const have = new Map(state.notes.map(n=>[n.id,n])); let a=0,u=0;
-    for (const n of data.notes){
-      if (!COLORS[n.color]) n.color='yellow';
-      const h = have.get(n.id);
+    for (const n0 of data.notes){
+      const n = fixNote(n0), h = have.get(n.id);
       if (!h){ state.notes.push(n); a++; } else if (n.updated > h.updated){ Object.assign(h,n); u++; }
     }
     save(); renderList(); toast(`匯入完成：新增 ${a}、更新 ${u}`);
   } catch { toast('這個檔案不是記事本備份'); }
 };
 
-document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else if (cur && !editing) paintMeta(); else if (!cur) renderList(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else if (cur) paintMeta(); else renderList(); });
 window.addEventListener('pagehide', save);
 window.addEventListener('resize', sizeText);
 
