@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="記事本">
+<meta name="theme-color" content="#f6f3ee">
+<link rel="apple-touch-icon" href="icon.png">
+<title>記事本</title>
+<style>
+:root{
+  --bg:#f6f3ee; --surface:#ffffff; --text:#2b2a28; --muted:#8a867f; --line:#e6e1d8;
+  --accent:#2b2a28; --shadow:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.05);
+  --c-yellow:#fbe9a6; --c-orange:#fbd3a8; --c-red:#f6b8b3; --c-pink:#f4c4dc; --c-purple:#d7c7f0;
+  --c-blue:#bcd8f5; --c-green:#c6e6bf; --c-gray:#dcdad6; --c-white:#ffffff;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#1b1a19; --surface:#262524; --text:#ece9e4; --muted:#9a958d; --line:#363431;
+    --accent:#ece9e4; --shadow:0 1px 2px rgba(0,0,0,.4);
+    --c-yellow:#5a4e22; --c-orange:#5c3f22; --c-red:#5a2c29; --c-pink:#55304a; --c-purple:#3f3558;
+    --c-blue:#26405a; --c-green:#2d4a2a; --c-gray:#3a3936; --c-white:#2e2d2b;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;font-size:16px}
+body{overscroll-behavior-y:none}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0}
+.hidden{display:none!important}
+
+/* ---------- list view ---------- */
+header{position:sticky;top:0;z-index:5;background:var(--bg);
+  padding:calc(env(safe-area-inset-top) + 10px) 16px 8px}
+.toprow{display:flex;align-items:center;gap:8px}
+.toprow h1{font-size:28px;margin:0;flex:1;letter-spacing:.5px}
+.iconbtn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px}
+.iconbtn:active{background:var(--line)}
+.search{margin-top:10px;display:flex;align-items:center;gap:8px;background:var(--surface);
+  border-radius:12px;padding:9px 12px;box-shadow:var(--shadow)}
+.search input{flex:1;min-width:0}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid transparent;box-shadow:var(--shadow)}
+.chip.all{width:auto;padding:0 12px;border-radius:15px;background:var(--surface);font-size:14px}
+.chip.on{border-color:var(--accent)}
+.section-label{font-size:13px;color:var(--muted);margin:14px 16px 6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
+.card{border-radius:14px;padding:12px;min-height:76px;box-shadow:var(--shadow);text-align:left;
+  display:flex;flex-direction:column;gap:6px;overflow:hidden;width:100%}
+.card:active{transform:scale(.98)}
+.card .t{font-weight:600;font-size:15px;line-height:1.3;word-break:break-word}
+.card .b{font-size:13.5px;line-height:1.45;opacity:.85;white-space:pre-wrap;word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.card .meta{font-size:11px;opacity:.55;margin-top:auto;display:flex;gap:6px;align-items:center}
+.card .ci{display:flex;gap:6px;font-size:13.5px;line-height:1.4}
+.card .ci.done{text-decoration:line-through;opacity:.5}
+.empty{text-align:center;color:var(--muted);padding:60px 20px;line-height:1.7}
+.fab{position:fixed;right:20px;bottom:calc(env(safe-area-inset-bottom) + 20px);width:58px;height:58px;
+  border-radius:50%;background:var(--accent);color:var(--bg);font-size:30px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:6}
+.spacer{height:110px}
+
+/* ---------- sheets ---------- */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:20;display:flex;align-items:flex-end}
+.sheet{background:var(--surface);width:100%;border-radius:18px 18px 0 0;
+  padding:10px 8px calc(env(safe-area-inset-bottom) + 10px)}
+.sheet button.row{display:flex;width:100%;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;text-align:left}
+.sheet button.row:active{background:var(--line)}
+.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 8px}
+.danger{color:#d0443a}
+
+/* ---------- editor ---------- */
+#editor{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:var(--c-yellow)}
+.ebar{display:flex;align-items:center;gap:4px;padding:calc(env(safe-area-inset-top) + 6px) 8px 6px}
+.ebar .grow{flex:1}
+.ebody{flex:1;overflow-y:auto;padding:4px 20px calc(env(safe-area-inset-bottom) + 40px);-webkit-overflow-scrolling:touch}
+#eTitle{width:100%;font-size:22px;font-weight:700;padding:6px 0 10px}
+#eText{width:100%;min-height:60vh;resize:none;line-height:1.65;font-size:17px}
+.item{display:flex;align-items:flex-start;gap:10px;padding:6px 0}
+.item .box{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid currentColor;opacity:.7;
+  margin-top:2px;display:grid;place-items:center;font-size:14px}
+.item.done .box{background:currentColor}
+.item.done .box::after{content:"✓";color:var(--c-yellow);filter:invert(1) grayscale(1) contrast(9)}
+.item textarea{flex:1;resize:none;line-height:1.5;font-size:17px;height:26px;overflow:hidden}
+.item.done textarea{text-decoration:line-through;opacity:.5}
+.item .x{flex:none;opacity:.35;font-size:18px;width:24px}
+.additem{display:flex;gap:10px;align-items:center;opacity:.6;padding:10px 0;font-size:17px}
+.donehdr{font-size:13px;opacity:.6;margin:14px 0 2px}
+.palette{display:flex;flex-wrap:wrap;gap:12px;padding:8px 16px 12px;justify-content:center}
+.palette button{width:42px;height:42px;border-radius:50%;border:2px solid var(--line)}
+.palette button.on{border:3px solid var(--accent)}
+.etime{font-size:12px;opacity:.5;margin-top:24px}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);
+  background:var(--accent);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;z-index:40;
+  display:flex;gap:14px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.toast button{font-weight:700;text-decoration:underline}
+</style>
+</head>
+<body>
+
+<!-- ===== LIST VIEW ===== -->
+<div id="listView">
+  <header>
+    <div class="toprow">
+      <h1 id="viewTitle">記事本</h1>
+      <button class="iconbtn" id="sortBtn" aria-label="排序">⇅</button>
+      <button class="iconbtn" id="menuBtn" aria-label="選單">⋯</button>
+    </div>
+    <div class="search">🔍<input id="q" type="search" placeholder="搜尋筆記" autocomplete="off"></div>
+    <div class="chips" id="chips"></div>
+  </header>
+  <main id="list"></main>
+  <div class="spacer"></div>
+  <button class="fab" id="fab" aria-label="新增">＋</button>
+</div>
+
+<!-- ===== EDITOR ===== -->
+<div id="editor" class="hidden">
+  <div class="ebar">
+    <button class="iconbtn" id="eBack" aria-label="返回">‹</button>
+    <div class="grow"></div>
+    <button class="iconbtn" id="eConvert" aria-label="切換清單／文字">☑︎</button>
+    <button class="iconbtn" id="eColor" aria-label="顏色">🎨</button>
+    <button class="iconbtn" id="ePin" aria-label="釘選">📌</button>
+    <button class="iconbtn" id="eMore" aria-label="更多">⋯</button>
+  </div>
+  <div class="ebody" id="ebody">
+    <input id="eTitle" placeholder="標題" autocomplete="off">
+    <textarea id="eText" placeholder="開始輸入…"></textarea>
+    <div id="eList" class="hidden"></div>
+    <div class="etime" id="eTime"></div>
+  </div>
+</div>
+
+<div id="sheetHost"></div>
+<input type="file" id="importFile" accept="application/json,.json" class="hidden">
+
+<script>
+(() => {
+const KEY = 'colornotes.v1';
+const COLORS = ['yellow','orange','red','pink','purple','blue','green','gray','white'];
+const COLOR_NAMES = {yellow:'黃',orange:'橘',red:'紅',pink:'粉',purple:'紫',blue:'藍',green:'綠',gray:'灰',white:'白'};
+const SORTS = {updated:'最近修改', created:'建立時間', color:'顏色', title:'標題'};
+
+let state = load();
+let ui = { filter:'all', q:'', view:'notes', sort: state.sort || 'updated' };
+let cur = null; // note being edited
+
+function load(){
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && Array.isArray(s.notes)) return s; } catch(e){}
+  return { notes: [], sort:'updated' };
+}
+function save(){
+  state.sort = ui.sort;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('儲存失敗：空間不足？'); }
+}
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const cvar = c => `var(--c-${c})`;
+
+function fmt(ts){
+  const d = new Date(ts), n = new Date();
+  const p = x => String(x).padStart(2,'0');
+  if (d.toDateString() === n.toDateString()) return `${p(d.getHours())}:${p(d.getMinutes())}`;
+  if (d.getFullYear() === n.getFullYear()) return `${d.getMonth()+1}/${d.getDate()}`;
+  return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+}
+function isEmpty(n){
+  return !n.title.trim() && (n.type === 'text' ? !n.body.trim() : n.items.every(i => !i.t.trim()));
+}
+function plain(n){
+  return n.type === 'text' ? n.body : n.items.map(i => (i.done?'☑ ':'☐ ') + i.t).join('\n');
+}
+
+/* ---------- list rendering ---------- */
+function renderChips(){
+  const el = $('#chips');
+  let h = `<button class="chip all ${ui.filter==='all'?'on':''}" data-c="all">全部</button>`;
+  for (const c of COLORS) h += `<button class="chip ${ui.filter===c?'on':''}" data-c="${c}" style="background:${cvar(c)}" aria-label="${COLOR_NAMES[c]}"></button>`;
+  el.innerHTML = h;
+}
+function sortFn(a,b){
+  switch(ui.sort){
+    case 'created': return b.created - a.created;
+    case 'color': return COLORS.indexOf(a.color) - COLORS.indexOf(b.color) || b.updated - a.updated;
+    case 'title': return (a.title||plain(a)).localeCompare(b.title||plain(b), 'zh-Hant');
+    default: return b.updated - a.updated;
+  }
+}
+function cardHTML(n){
+  let body = '';
+  if (n.type === 'text') body = `<div class="b">${esc(n.body)}</div>`;
+  else {
+    const items = [...n.items.filter(i=>!i.done), ...n.items.filter(i=>i.done)].filter(i=>i.t.trim()).slice(0,6);
+    body = items.map(i => `<div class="ci ${i.done?'done':''}">${i.done?'☑':'☐'} <span>${esc(i.t)}</span></div>`).join('');
+  }
+  const cnt = n.type==='check' ? ` · ${n.items.filter(i=>i.done&&i.t.trim()).length}/${n.items.filter(i=>i.t.trim()).length}` : '';
+  return `<button class="card" data-id="${n.id}" style="background:${cvar(n.color)}">
+    ${n.title ? `<div class="t">${esc(n.title)}</div>` : ''}${body}
+    <div class="meta">${n.pinned?'📌':''}${fmt(n.updated)}${cnt}</div></button>`;
+}
+function renderList(){
+  $('#viewTitle').textContent = ui.view === 'trash' ? '垃圾桶' : '記事本';
+  $('#fab').classList.toggle('hidden', ui.view === 'trash');
+  const q = ui.q.trim().toLowerCase();
+  let notes = state.notes.filter(n => ui.view === 'trash' ? n.deleted : !n.deleted)
+    .filter(n => ui.filter === 'all' || n.color === ui.filter)
+    .filter(n => !q || (n.title + '\n' + plain(n)).toLowerCase().includes(q))
+    .sort(sortFn);
+  const el = $('#list');
+  if (!notes.length){
+    el.innerHTML = `<div class="empty">${ui.view==='trash' ? '垃圾桶是空的' : (q||ui.filter!=='all' ? '找不到符合的筆記' : '還沒有筆記<br>點右下角 ＋ 開始寫')}</div>`;
+    return;
+  }
+  const pinned = ui.view==='notes' ? notes.filter(n=>n.pinned) : [];
+  const rest = ui.view==='notes' ? notes.filter(n=>!n.pinned) : notes;
+  let h = '';
+  if (pinned.length){
+    h += `<div class="section-label">釘選</div><div class="grid">${pinned.map(cardHTML).join('')}</div>`;
+    if (rest.length) h += `<div class="section-label">其他</div>`;
+  }
+  if (ui.view==='trash') h += `<div class="section-label">點一下可還原或永久刪除</div>`;
+  h += `<div class="grid" style="${pinned.length?'':'margin-top:8px'}">${rest.map(cardHTML).join('')}</div>`;
+  el.innerHTML = h;
+}
+function render(){ renderChips(); renderList(); }
+
+/* ---------- sheets / toast ---------- */
+function sheet(rows, extraHTML=''){
+  const host = $('#sheetHost');
+  host.innerHTML = `<div class="backdrop"><div class="sheet"><div class="grab"></div>${extraHTML}
+    ${rows.map((r,i)=>`<button class="row ${r.danger?'danger':''}" data-i="${i}">${r.icon||''} ${r.label}</button>`).join('')}</div></div>`;
+  const bd = host.firstChild;
+  bd.addEventListener('click', e => {
+    if (e.target === bd) return close();
+    const b = e.target.closest('button.row');
+    if (b){ close(); rows[+b.dataset.i].fn(); }
+  });
+  function close(){ host.innerHTML = ''; }
+  return { el: bd, close };
+}
+let toastTimer;
+function toast(msg, action){
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t = document.createElement('div'); t.className = 'toast';
+  t.innerHTML = `<span>${msg}</span>` + (action ? `<button>${action.label}</button>` : '');
+  if (action) t.querySelector('button').onclick = () => { action.fn(); t.remove(); };
+  document.body.appendChild(t);
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.remove(), 3500);
+}
+
+/* ---------- editor ---------- */
+function newNote(type){
+  const color = ui.filter !== 'all' ? ui.filter : 'yellow';
+  const n = { id:uid(), type, title:'', body:'', items: type==='check'?[{t:'',done:false}]:[], color,
+    pinned:false, deleted:false, created:Date.now(), updated:Date.now() };
+  state.notes.push(n);
+  openEditor(n, true);
+}
+function openEditor(n, isNew){
+  cur = n;
+  $('#editor').classList.remove('hidden');
+  $('#eTitle').value = n.title;
+  $('#eText').value = n.body;
+  paintEditor();
+  if (isNew){
+    setTimeout(() => (n.type==='text' ? $('#eText') : $('#eList textarea')).focus(), 50);
+  }
+}
+function paintEditor(){
+  const n = cur;
+  $('#editor').style.background = cvar(n.color);
+  document.querySelector('meta[name=theme-color]').content = getComputedStyle(document.documentElement).getPropertyValue('--c-'+n.color).trim();
+  $('#ePin').style.opacity = n.pinned ? 1 : .4;
+  $('#eConvert').textContent = n.type==='text' ? '☑︎' : '¶';
+  $('#eText').classList.toggle('hidden', n.type !== 'text');
+  $('#eList').classList.toggle('hidden', n.type !== 'check');
+  if (n.type === 'check') renderItems();
+  else autosizeText();
+  $('#eTime').textContent = `建立 ${new Date(n.created).toLocaleString('zh-TW')}　·　修改 ${new Date(n.updated).toLocaleString('zh-TW')}`;
+}
+function autosizeText(){
+  const t = $('#eText'); t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight, window.innerHeight*0.6) + 'px';
+}
+function itemHTML(it, idx){
+  return `<div class="item ${it.done?'done':''}" data-i="${idx}">
+    <button class="box" aria-label="勾選"></button>
+    <textarea rows="1" enterkeyhint="next">${esc(it.t)}</textarea>
+    <button class="x" aria-label="刪除項目">✕</button></div>`;
+}
+function renderItems(focusIdx, caret){
+  const n = cur;
+  const open = n.items.map((it,i)=>[it,i]).filter(([it])=>!it.done);
+  const done = n.items.map((it,i)=>[it,i]).filter(([it])=>it.done);
+  let h = open.map(([it,i])=>itemHTML(it,i)).join('');
+  h += `<button class="additem" id="addItem">＋ 新增項目</button>`;
+  if (done.length) h += `<div class="donehdr">已完成 ${done.length} 項</div>` + done.map(([it,i])=>itemHTML(it,i)).join('');
+  $('#eList').innerHTML = h;
+  $('#eList').querySelectorAll('textarea').forEach(sizeTA);
+  if (focusIdx != null){
+    const ta = $(`#eList .item[data-i="${focusIdx}"] textarea`);
+    if (ta){ ta.focus(); const p = caret ?? ta.value.length; ta.setSelectionRange(p,p); }
+  }
+}
+function sizeTA(t){ t.style.height='auto'; t.style.height = t.scrollHeight + 'px'; }
+function touch(){ cur.updated = Date.now(); save(); }
+
+function closeEditor(){
+  if (!cur) return;
+  document.activeElement && document.activeElement.blur();
+  if (cur.type==='check') cur.items = cur.items.filter((it,i,arr)=> it.t.trim() || arr.length===1);
+  if (isEmpty(cur)){
+    state.notes = state.notes.filter(n => n !== cur);
+  }
+  save();
+  cur = null;
+  $('#editor').classList.add('hidden');
+  document.querySelector('meta[name=theme-color]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  render();
+}
+
+/* editor events */
+$('#eBack').onclick = closeEditor;
+$('#eTitle').addEventListener('input', e => { cur.title = e.target.value; touch(); });
+$('#eTitle').addEventListener('keydown', e => {
+  if (e.key === 'Enter'){ e.preventDefault();
+    if (cur.type==='text') $('#eText').focus();
+    else { const t = $('#eList textarea'); t ? t.focus() : addItemAt(0); }
+  }
+});
+$('#eText').addEventListener('input', e => { cur.body = e.target.value; autosizeText(); touch(); });
+
+function addItemAt(pos, text=''){
+  cur.items.splice(pos, 0, {t:text, done:false}); touch(); renderItems(pos, 0);
+}
+$('#eList').addEventListener('input', e => {
+  const row = e.target.closest('.item'); if (!row) return;
+  cur.items[+row.dataset.i].t = e.target.value; sizeTA(e.target); touch();
+});
+$('#eList').addEventListener('keydown', e => {
+  const row = e.target.closest('.item'); if (!row || e.target.tagName!=='TEXTAREA') return;
+  const i = +row.dataset.i, ta = e.target;
+  if (e.key === 'Enter' && !e.isComposing){
+    e.preventDefault();
+    const pos = ta.selectionStart, before = ta.value.slice(0,pos), after = ta.value.slice(pos);
+    cur.items[i].t = before;
+    if (!before.trim() && !after.trim()){ ta.blur(); return; } // enter on empty line = done
+    addItemAt(i+1, after);
+  } else if (e.key === 'Backspace' && ta.selectionStart === 0 && ta.selectionEnd === 0){
+    // merge with previous open item
+    const openIdx = cur.items.map((it,k)=>k).filter(k=>!cur.items[k].done);
+    const p = openIdx.indexOf(i);
+    if (p > 0){
+      e.preventDefault();
+      const prev = openIdx[p-1], caret = cur.items[prev].t.length;
+      cur.items[prev].t += ta.value; cur.items.splice(i,1); touch();
+      renderItems(prev > i ? prev-1 : prev, caret);
+    }
+  }
+});
+$('#eList').addEventListener('click', e => {
+  if (e.target.id === 'addItem'){
+    const lastOpen = cur.items.reduce((m,it,k)=> it.done?m:k, -1);
+    return addItemAt(lastOpen+1);
+  }
+  const row = e.target.closest('.item'); if (!row) return;
+  const i = +row.dataset.i;
+  if (e.target.classList.contains('box')){
+    cur.items[i].done = !cur.items[i].done; touch(); renderItems();
+  } else if (e.target.classList.contains('x')){
+    const removed = cur.items.splice(i,1)[0]; touch(); renderItems();
+    toast('已刪除項目', {label:'復原', fn:()=>{ cur && (cur.items.splice(i,0,removed), touch(), renderItems()); }});
+  }
+});
+
+$('#ePin').onclick = () => { cur.pinned = !cur.pinned; touch(); paintEditor(); toast(cur.pinned?'已釘選':'已取消釘選'); };
+$('#eColor').onclick = () => {
+  const s = sheet([], `<div class="palette">${COLORS.map(c=>`<button data-c="${c}" class="${cur.color===c?'on':''}" style="background:${cvar(c)}" aria-label="${COLOR_NAMES[c]}"></button>`).join('')}</div>`);
+  s.el.querySelector('.palette').onclick = e => {
+    const c = e.target.dataset.c; if (!c) return;
+    cur.color = c; touch(); paintEditor(); s.close();
+  };
+};
+$('#eConvert').onclick = () => {
+  if (cur.type === 'text'){
+    const lines = cur.body.split('\n').map(s=>s.trim()).filter(Boolean);
+    cur.items = (lines.length?lines:['']).map(t=>({t, done:false}));
+    cur.type = 'check';
+    toast('已轉為清單');
+  } else {
+    cur.body = cur.items.filter(i=>i.t.trim()).map(i=>i.t).join('\n');
+    $('#eText').value = cur.body;
+    cur.type = 'text';
+    toast('已轉為文字');
+  }
+  touch(); paintEditor();
+};
+$('#eMore').onclick = () => {
+  const rows = [
+    {icon:'📋', label:'複製全文', fn:()=>copyNote(cur)},
+    {icon:'📤', label:'分享', fn:()=>shareNote(cur)},
+  ];
+  if (cur.type==='check'){
+    rows.push({icon:'☐', label:'全部取消勾選', fn:()=>{cur.items.forEach(i=>i.done=false);touch();renderItems();}});
+    rows.push({icon:'🧹', label:'清除已完成項目', fn:()=>{cur.items=cur.items.filter(i=>!i.done); if(!cur.items.length)cur.items=[{t:'',done:false}]; touch();renderItems();}});
+  }
+  rows.push({icon:'🗑', label:'移到垃圾桶', danger:true, fn:()=>{
+    const n = cur; n.deleted = true; n.pinned = false; touch(); closeEditor();
+    toast('已移到垃圾桶', {label:'復原', fn:()=>{ n.deleted=false; save(); render(); }});
+  }});
+  sheet(rows);
+};
+function copyNote(n){
+  const txt = (n.title ? n.title + '\n\n' : '') + plain(n);
+  navigator.clipboard?.writeText(txt).then(()=>toast('已複製'), ()=>toast('複製失敗'));
+}
+function shareNote(n){
+  const txt = (n.title ? n.title + '\n\n' : '') + plain(n);
+  if (navigator.share) navigator.share({ text: txt }).catch(()=>{});
+  else copyNote(n);
+}
+
+/* ---------- list events ---------- */
+$('#chips').onclick = e => { const c = e.target.dataset.c; if (!c) return; ui.filter = c; render(); };
+$('#q').addEventListener('input', e => { ui.q = e.target.value; renderList(); });
+$('#list').onclick = e => {
+  const card = e.target.closest('.card'); if (!card) return;
+  const n = state.notes.find(x => x.id === card.dataset.id);
+  if (ui.view === 'trash'){
+    sheet([
+      {icon:'↩︎', label:'還原', fn:()=>{ n.deleted=false; save(); render(); toast('已還原'); }},
+      {icon:'✕', label:'永久刪除', danger:true, fn:()=>{ state.notes = state.notes.filter(x=>x!==n); save(); render(); }},
+    ]);
+  } else openEditor(n);
+};
+$('#fab').onclick = () => sheet([
+  {icon:'📝', label:'文字筆記', fn:()=>newNote('text')},
+  {icon:'☑️', label:'清單', fn:()=>newNote('check')},
+]);
+$('#sortBtn').onclick = () => sheet(Object.entries(SORTS).map(([k,v])=>({
+  icon: ui.sort===k ? '●' : '○', label:v, fn:()=>{ ui.sort=k; save(); renderList(); }
+})));
+$('#menuBtn').onclick = () => {
+  const trashCount = state.notes.filter(n=>n.deleted).length;
+  const rows = ui.view==='trash'
+    ? [{icon:'‹', label:'回到記事本', fn:()=>{ui.view='notes';render();}},
+       {icon:'✕', label:`清空垃圾桶（${trashCount}）`, danger:true, fn:()=>{
+         if (confirm('永久刪除垃圾桶裡的所有筆記？')){ state.notes = state.notes.filter(n=>!n.deleted); save(); render(); } }}]
+    : [{icon:'🗑', label:`垃圾桶（${trashCount}）`, fn:()=>{ui.view='trash';render();}},
+       {icon:'⬇︎', label:'匯出備份', fn:exportData},
+       {icon:'⬆︎', label:'匯入備份', fn:()=>$('#importFile').click()}];
+  sheet(rows);
+};
+
+/* ---------- backup ---------- */
+function exportData(){
+  const data = JSON.stringify({app:'colornotes', version:1, exported:Date.now(), notes:state.notes}, null, 1);
+  const d = new Date(), name = `記事本備份-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  const file = new File([data], name, {type:'application/json'});
+  if (navigator.canShare && navigator.canShare({files:[file]})){
+    navigator.share({files:[file]}).catch(()=>{});
+  } else {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+  }
+}
+$('#importFile').onchange = async e => {
+  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  try {
+    const data = JSON.parse(await f.text());
+    if (!Array.isArray(data.notes)) throw 0;
+    const have = new Map(state.notes.map(n=>[n.id,n]));
+    let added = 0, updated = 0;
+    for (const n of data.notes){
+      const h = have.get(n.id);
+      if (!h){ state.notes.push(n); added++; }
+      else if (n.updated > h.updated){ Object.assign(h, n); updated++; }
+    }
+    save(); render(); toast(`匯入完成：新增 ${added}、更新 ${updated}`);
+  } catch { toast('這個檔案不是記事本備份'); }
+};
+
+/* save when app goes to background */
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+window.addEventListener('pagehide', save);
+
+render();
+})();
+</script>
+</body>
+</html>
