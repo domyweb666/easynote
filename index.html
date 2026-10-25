@@ -73,31 +73,31 @@ svg{display:block}
   background-attachment:local;line-height:44px;font-size:20px;padding:0 14px;min-height:100%}
 #eText{display:block;width:100%;border:0;resize:none;background-color:transparent;min-height:100%;padding:0 0 160px}
 
-/* --- checklist --- */
+/* --- idea list --- */
 .cl{padding:2px 0 200px}
-.ci{display:flex;align-items:flex-start;gap:4px;padding:0 0 0 6px;position:relative;background:var(--bg);
-  border-bottom:1px solid var(--rule);transition:background .15s}
-.ci.focus{background:rgba(255,255,255,.5)}
-.ci .cb{flex:none;width:44px;height:52px;display:grid;place-items:center}
-.ci .cb i{width:24px;height:24px;border-radius:50%;border:2px solid rgba(0,0,0,.4);display:grid;place-items:center;transition:all .15s}
-.ci.done .cb i{background:rgba(0,0,0,.45);border-color:transparent}
-.ci.done .cb i::after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
-.ci.ticking .cb i{background:var(--teal);border-color:transparent;transform:scale(1.15)}
+.ci{position:relative;border-bottom:1px solid var(--rule);overflow:hidden;touch-action:pan-y}
+.ci .under{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:0 18px;font-size:15px;font-weight:600}
+.ci .under .l{color:#fff}
+.ci .under .r{color:#fff}
+.ci.sw-r .under{background:#7a7a7a}
+.ci.sw-l .under{background:#d0443a}
+.ci.sw-r .under .r, .ci.sw-l .under .l{visibility:hidden}
+.ci .cin{position:relative;display:flex;align-items:flex-start;gap:2px;padding:0 0 0 12px;background:var(--bg);will-change:transform}
+.ci.focus .cin{background:color-mix(in srgb, var(--bg) 55%, #fff)}
+.ci .bul{flex:none;width:18px;height:54px;display:grid;place-items:center}
+.ci .bul i{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.35)}
 .ci textarea{flex:1;min-width:0;border:0;background:transparent;resize:none;font-size:20px;line-height:1.5;
-  padding:12px 0;height:54px;overflow:hidden;display:block}
-.ci.done textarea{text-decoration:line-through;color:rgba(0,0,0,.42)}
-.ci.ticking textarea{text-decoration:line-through;color:rgba(0,0,0,.42)}
+  padding:12px 4px;height:54px;overflow:hidden;display:block}
+.ci.done textarea{text-decoration:line-through;text-decoration-thickness:2px;color:rgba(0,0,0,.38)}
+.ci.done .bul i{background:rgba(0,0,0,.18)}
 .ci .x{flex:none;width:40px;height:52px;display:none;place-items:center;color:rgba(0,0,0,.4);font-size:19px}
 .ci.focus .x{display:grid}
-.ci .grip{flex:none;width:40px;height:52px;display:grid;place-items:center;color:rgba(0,0,0,.28);touch-action:none;font-size:20px;letter-spacing:-2px}
+.ci .grip{flex:none;width:36px;height:52px;display:grid;place-items:center;color:rgba(0,0,0,.22);touch-action:none;font-size:18px;letter-spacing:-2px}
 .ci.focus .grip{display:none}
-.ci.dragging{z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.2);background:var(--bg)}
-.addrow{display:flex;align-items:center;gap:4px;width:100%;padding:0 0 0 6px;height:54px;font-size:19px;color:rgba(0,0,0,.45);text-align:left}
-.addrow span:first-child{width:44px;text-align:center;font-size:24px}
-.donehdr{display:flex;align-items:center;gap:8px;width:100%;padding:18px 16px 10px;font-size:15px;color:rgba(0,0,0,.5);text-align:left}
-.donehdr .arr{transition:transform .2s;display:inline-block}
-.donehdr.open .arr{transform:rotate(90deg)}
-.donehdr .clr{margin-left:auto;font-size:14px;text-decoration:underline}
+.ci.dragging{z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.addrow{display:flex;align-items:center;gap:2px;width:100%;padding:0 0 0 12px;height:54px;font-size:19px;color:rgba(0,0,0,.4);text-align:left}
+.addrow span:first-child{width:18px;text-align:center;font-size:22px;margin-right:4px}
+.hint{font-size:13px;color:rgba(0,0,0,.4);text-align:center;padding:14px}
 
 /* keyboard toolbar */
 .kbar{position:fixed;left:0;right:0;bottom:0;z-index:12;display:flex;align-items:center;gap:6px;
@@ -256,7 +256,7 @@ function ago(ts){
   if (s < 86400*365) return `${Math.floor(s/86400/30)} 個月前`;
   return `${Math.floor(s/86400/365)} 年前`;
 }
-const plain = n => n.type==='text' ? n.body : n.items.map(i=>(i.done?'✓ ':'□ ')+i.t).join('\n');
+const plain = n => n.type==='text' ? n.body : n.items.map(i=>i.done ? i.t.split('').map(c=>c+'\u0336').join('') : i.t).join('\n');
 const label = n => n.title.trim() || (n.type==='text' ? n.body : n.items.map(i=>i.t).join('\n')).split('\n').find(l=>l.trim()) || '（無標題）';
 const isEmpty = n => !n.title.trim() && (n.type==='text' ? !n.body.trim() : n.items.every(i=>!i.t.trim()));
 
@@ -288,7 +288,7 @@ function renderList(){
   const q = ui.q.trim().toLowerCase();
   let notes = state.notes.filter(n => trash ? n.deleted : !n.deleted)
     .filter(n => ui.filter==='all' || n.color===ui.filter)
-    .filter(n => !q || (n.title+'\n'+plain(n)).toLowerCase().includes(q));
+    .filter(n => !q || (n.title+'\n'+n.body+'\n'+n.items.map(i=>i.t).join('\n')).toLowerCase().includes(q));
   notes.sort((a,b) => {
     if (!trash && a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     switch(ui.sort){
@@ -305,11 +305,9 @@ function renderList(){
   }
   el.innerHTML = notes.map(n => {
     const c = col(n.color);
-    const items = n.items.filter(i=>i.t.trim());
-    const prog = n.type==='check' && items.length ? `<span class="prog">${items.filter(i=>i.done).length}/${items.length}</span>` : '';
     return `<button class="row" data-id="${n.id}" style="background:${c.bg};border-left-color:${c.hd}">
       <span class="rt">${esc(label(n))}</span>
-      <span class="rd">${n.pinned?'📌':''}${prog}${n.type==='check'?I.check:''}<span>${listDate(n.updated)}</span></span>
+      <span class="rd">${n.pinned?'📌':''}${n.type==='check'?I.check:''}<span>${listDate(n.updated)}</span></span>
     </button>`;
   }).join('');
 }
@@ -362,7 +360,7 @@ $('#navMenu').onclick = $('#lMore').onclick = () => {
 /* ================= NOTE ================= */
 function newNote(type){
   const n = { id:uid(), type, title:'', body:'', items: type==='check' ? [{id:uid(),t:'',done:false}] : [],
-    color: ui.filter!=='all' ? ui.filter : 'yellow', pinned:false, deleted:false, showDone:false,
+    color: ui.filter!=='all' ? ui.filter : 'yellow', pinned:false, deleted:false,
     created:Date.now(), updated:Date.now() };
   state.notes.push(n);
   openNote(n);
@@ -385,12 +383,7 @@ function setTheme(){
   $('.nhead').style.color = cur.color==='black' ? '#fff' : '#1f1f1f';
 }
 function paintMeta(){
-  let left = ago(cur.updated);
-  if (cur.type==='check'){
-    const it = cur.items.filter(i=>i.t.trim());
-    if (it.length) left = `完成 ${it.filter(i=>i.done).length} / ${it.length}　·　${left}`;
-  }
-  $('#mLeft').textContent = left;
+  $('#mLeft').textContent = ago(cur.updated);
   $('#mRight').textContent = fullDate(cur.updated);
 }
 function paintBody(){
@@ -410,24 +403,23 @@ function sizeText(){
   t.style.height = Math.max(t.scrollHeight, $('#nbody').clientHeight) + 'px';
 }
 
-/* ---------- checklist ---------- */
+/* ---------- idea list ---------- */
 function itemHTML(it){
   return `<div class="ci ${it.done?'done':''}" data-id="${it.id}">
-    <button class="cb" aria-label="${it.done?'取消勾選':'勾選'}"><i></i></button>
-    <textarea rows="1" enterkeyhint="next" placeholder="${it.done?'':'輸入項目'}">${esc(it.t)}</textarea>
-    <button class="x" aria-label="刪除項目">✕</button>
-    ${it.done ? '' : '<span class="grip" aria-label="拖曳排序">⋮⋮</span>'}
+    <div class="under"><span class="l">${it.done?'恢復':'劃掉'}</span><span class="r">刪除</span></div>
+    <div class="cin">
+      <span class="bul"><i></i></span>
+      <textarea rows="1" enterkeyhint="next" placeholder="寫下想法…">${esc(it.t)}</textarea>
+      <button class="x" aria-label="刪除這行">✕</button>
+      <span class="grip" aria-label="拖曳排序">⋮⋮</span>
+    </div>
   </div>`;
 }
 function renderChecklist(){
-  const open = cur.items.filter(i=>!i.done), done = cur.items.filter(i=>i.done);
-  let h = `<div class="cl" id="cl">` + open.map(itemHTML).join('')
-    + `<button class="addrow" id="addItem"><span>＋</span><span>新增項目</span></button>`;
-  if (done.length){
-    h += `<div class="donehdr ${cur.showDone?'open':''}" id="doneHdr"><span class="arr">▸</span><span>已完成 ${done.length} 項</span>
-      ${cur.showDone ? '<button class="clr" id="clrDone">全部刪除</button>' : ''}</div>`;
-    if (cur.showDone) h += done.map(itemHTML).join('');
-  }
+  let h = `<div class="cl" id="cl">` + cur.items.map(itemHTML).join('')
+    + `<button class="addrow" id="addItem"><span>＋</span><span>新增一行</span></button>`;
+  let seen = false; try { seen = localStorage.getItem('cn.hint') === '1'; } catch(e){}
+  if (!seen && cur.items.some(i=>i.t.trim())) h += `<div class="hint">向右滑＝劃掉／恢復　·　向左滑＝刪除</div>`;
   $('#nbody').innerHTML = h + `</div>`;
   $('#nbody').querySelectorAll('.ci textarea').forEach(sizeTA);
 }
@@ -442,54 +434,45 @@ function focusItem(id, caret){
 }
 function insertAfter(id, text='', focus=true){
   const n = {id:uid(), t:text, done:false};
-  const idx = id == null ? -1 : findItem(id);
-  if (idx < 0){ // append after last open item
-    let last = -1; cur.items.forEach((it,k)=>{ if(!it.done) last = k; });
-    cur.items.splice(last+1, 0, n);
-  } else cur.items.splice(idx+1, 0, n);
+  const idx = id == null ? cur.items.length - 1 : findItem(id);
+  cur.items.splice(idx+1, 0, n);
   changed(); renderChecklist();
   if (focus) focusItem(n.id, 0);
   return n;
+}
+function toggleStrike(id){
+  const it = cur.items[findItem(id)]; if (!it || !it.t.trim()) return;
+  it.done = !it.done; changed(true); renderChecklist();
+  try { localStorage.setItem('cn.hint','1'); } catch(e){}
+}
+function removeItem(id){
+  const idx = findItem(id); if (idx < 0) return;
+  const removed = cur.items.splice(idx,1)[0];
+  if (!cur.items.length) cur.items.push({id:uid(), t:'', done:false});
+  changed(true); renderChecklist();
+  try { localStorage.setItem('cn.hint','1'); } catch(e){}
+  if (removed.t.trim()) toast('已刪除', {label:'復原', fn:()=>{ if(cur){ cur.items.splice(idx,0,removed); changed(true); renderChecklist(); } }});
 }
 
 $('#nbody').addEventListener('click', e => {
   if (!cur || cur.type!=='check') return;
   if (e.target.closest('#addItem')) return insertAfter(null);
-  if (e.target.closest('#clrDone')){
-    e.stopPropagation();
-    return confirmDlg('刪除所有已完成項目？', () => { cur.items = cur.items.filter(i=>!i.done); changed(true); renderChecklist(); paintMeta(); });
-  }
-  if (e.target.closest('#doneHdr')){ cur.showDone = !cur.showDone; save(); return renderChecklist(); }
-  const row = e.target.closest('.ci'); if (!row) return;
-  const id = row.dataset.id, it = cur.items[findItem(id)];
-  if (e.target.closest('.cb')){
-    if (!it.t.trim() && !it.done) return;
-    if (!it.done){
-      row.classList.add('ticking');
-      document.activeElement?.blur();
-      setTimeout(() => { it.done = true; changed(true); renderChecklist(); paintMeta(); }, 260);
-    } else { it.done = false; changed(true); renderChecklist(); paintMeta(); }
+  const row = e.target.closest('.ci');
+  if (row && e.target.closest('.x')){
+    const id = row.dataset.id, idx = findItem(id);
+    removeItem(id);
+    const next = cur.items[Math.min(idx, cur.items.length-1)]; if (next) focusItem(next.id);
     return;
   }
-  if (e.target.closest('.x')){
-    const idx = findItem(id), removed = cur.items.splice(idx,1)[0];
-    changed(true); renderChecklist(); paintMeta();
-    const next = cur.items[idx] && !cur.items[idx].done ? cur.items[idx] : cur.items.filter(i=>!i.done).pop();
-    if (next) focusItem(next.id);
-    toast('已刪除項目', {label:'復原', fn:()=>{ if(cur){ cur.items.splice(idx,0,removed); changed(true); renderChecklist(); paintMeta(); } }});
-  }
-});
-// tap empty space under the list = new item
-$('#nbody').addEventListener('click', e => {
-  if (!cur || cur.type!=='check') return;
-  if (e.target.id === 'cl' || e.target.id === 'nbody'){
-    const last = cur.items.filter(i=>!i.done).pop();
+  // tap empty space under the list = new line
+  if (e.target.id === 'cl' || e.target.id === 'nbody' || e.target.classList.contains('hint')){
+    const last = cur.items[cur.items.length-1];
     if (last && !last.t.trim()) focusItem(last.id); else insertAfter(null);
   }
 });
 $('#nbody').addEventListener('input', e => {
   const row = e.target.closest('.ci'); if (!row || !cur) return;
-  const it = cur.items[findItem(row.dataset.id)]; it.t = e.target.value;
+  cur.items[findItem(row.dataset.id)].t = e.target.value;
   sizeTA(e.target); changed();
 });
 $('#nbody').addEventListener('keydown', e => {
@@ -498,30 +481,25 @@ $('#nbody').addEventListener('keydown', e => {
   const id = row.dataset.id, idx = findItem(id), it = cur.items[idx], ta = e.target;
   if (e.key === 'Enter'){
     e.preventDefault();
-    if (it.done) { ta.blur(); return; }
     if (!ta.value.trim()){ ta.blur(); return; }          // Enter on empty line = stop
-    const pos = ta.selectionStart;
-    const after = ta.value.slice(pos);
+    const pos = ta.selectionStart, after = ta.value.slice(pos);
     it.t = ta.value.slice(0,pos);
     insertAfter(id, after);
-  } else if (e.key === 'Backspace' && ta.selectionStart === 0 && ta.selectionEnd === 0 && !it.done){
-    const openIdx = cur.items.map((x,k)=>x.done?-1:k).filter(k=>k>=0);
-    const p = openIdx.indexOf(idx);
-    if (p > 0){
-      e.preventDefault();
-      const prev = cur.items[openIdx[p-1]], caret = prev.t.length;
-      prev.t += it.t; cur.items.splice(idx,1);
-      changed(true); renderChecklist(); focusItem(prev.id, caret);
-    }
+  } else if (e.key === 'Backspace' && ta.selectionStart === 0 && ta.selectionEnd === 0 && idx > 0){
+    e.preventDefault();
+    const prev = cur.items[idx-1], caret = prev.t.length;
+    prev.t += it.t; cur.items.splice(idx,1);
+    changed(true); renderChecklist(); focusItem(prev.id, caret);
   }
 });
-// paste multiple lines → multiple items
+// paste multiple lines → multiple lines
 $('#nbody').addEventListener('paste', e => {
   const row = e.target.closest('.ci'); if (!row) return;
   const txt = (e.clipboardData || window.clipboardData)?.getData('text') || '';
   if (!txt.includes('\n')) return;
   e.preventDefault();
   const lines = txt.split(/\r?\n/).map(s=>s.replace(/^\s*([-*•□☐✓☑]|\d+[.)、])\s*/,'').trim()).filter(Boolean);
+  if (!lines.length) return;
   const ta = e.target, id = row.dataset.id, it = cur.items[findItem(id)];
   const before = ta.value.slice(0, ta.selectionStart), after = ta.value.slice(ta.selectionEnd);
   it.t = before + lines[0];
@@ -530,8 +508,8 @@ $('#nbody').addEventListener('paste', e => {
     const n = {id:uid(), t:lines[k], done:false};
     cur.items.splice(findItem(prevId)+1, 0, n); prevId = n.id;
   }
-  cur.items[findItem(prevId)].t += after;
-  changed(true); renderChecklist(); paintMeta(); focusItem(prevId, cur.items[findItem(prevId)].t.length - after.length);
+  const last = cur.items[findItem(prevId)], caret = last.t.length; last.t += after;
+  changed(true); renderChecklist(); focusItem(prevId, caret);
 });
 // focus highlight + keyboard bar
 document.addEventListener('focusin', e => {
@@ -550,18 +528,62 @@ document.addEventListener('focusout', () => {
   }, 120);
 });
 function cleanupEmpty(){
-  const before = cur.items.length;
   const keep = cur.items.filter(i => i.t.trim());
-  if (keep.length !== before && keep.length > 0){ cur.items = keep; save(); renderChecklist(); }
+  if (keep.length !== cur.items.length && keep.length > 0){ cur.items = keep; save(); renderChecklist(); }
 }
 
-/* ---------- drag to reorder (open items) ---------- */
+/* ---------- swipe: right = strike, left = delete ---------- */
+let sw = null;
+$('#nbody').addEventListener('pointerdown', e => {
+  if (e.target.closest('.grip') || e.target.closest('.x')) return;
+  const row = e.target.closest('.ci'); if (!row || !cur || cur.type!=='check') return;
+  sw = { row, x:e.clientX, y:e.clientY, dx:0, on:false, id:e.pointerId };
+});
+$('#nbody').addEventListener('pointermove', e => {
+  if (!sw || drag) return;
+  const dx = e.clientX - sw.x, dy = e.clientY - sw.y;
+  if (!sw.on){
+    if (Math.abs(dy) > 12 && Math.abs(dy) > Math.abs(dx)){ sw = null; return; }
+    if (Math.abs(dx) < 14 || Math.abs(dx) < Math.abs(dy)*1.4) return;
+    sw.on = true;
+    try { sw.row.setPointerCapture(sw.id); } catch(_){}
+    document.activeElement?.blur();
+  }
+  e.preventDefault();
+  sw.dx = dx;
+  sw.row.classList.toggle('sw-r', dx > 0); sw.row.classList.toggle('sw-l', dx < 0);
+  sw.row.querySelector('.cin').style.transform = `translateX(${dx}px)`;
+});
+function endSwipe(){
+  if (!sw) return;
+  const s = sw; sw = null;
+  if (!s.on) return;
+  const cin = s.row.querySelector('.cin'), w = s.row.offsetWidth;
+  if (s.dx > Math.min(90, w*.25)){
+    cin.style.transition = 'transform .15s'; cin.style.transform = '';
+    setTimeout(() => toggleStrike(s.row.dataset.id), 150);
+  } else if (s.dx < -Math.min(110, w*.3)){
+    cin.style.transition = 'transform .18s'; cin.style.transform = `translateX(${-w}px)`;
+    setTimeout(() => removeItem(s.row.dataset.id), 180);
+  } else {
+    cin.style.transition = 'transform .18s'; cin.style.transform = '';
+    setTimeout(() => { cin.style.transition=''; s.row.classList.remove('sw-l','sw-r'); }, 200);
+  }
+  // swallow the click that follows a swipe so it doesn't focus the text
+  const stop = ev => { ev.stopPropagation(); ev.preventDefault(); };
+  s.row.addEventListener('click', stop, {capture:true, once:true});
+  setTimeout(() => s.row.removeEventListener('click', stop, {capture:true}), 400);
+}
+$('#nbody').addEventListener('pointerup', endSwipe);
+$('#nbody').addEventListener('pointercancel', () => { if (sw && sw.on) { sw.dx = 0; } endSwipe(); });
+
+/* ---------- drag to reorder ---------- */
 let drag = null;
 $('#nbody').addEventListener('pointerdown', e => {
   const g = e.target.closest('.grip'); if (!g) return;
   e.preventDefault();
   const row = g.closest('.ci');
-  const rows = [...$('#nbody').querySelectorAll('.ci:not(.done)')];
+  const rows = [...$('#nbody').querySelectorAll('.ci')];
   drag = { row, rows, startY: e.clientY, idx: rows.indexOf(row), to: rows.indexOf(row),
     h: row.offsetHeight, mids: rows.map(r => { const b = r.getBoundingClientRect(); return b.top + b.height/2; }) };
   row.classList.add('dragging'); g.setPointerCapture(e.pointerId);
@@ -581,14 +603,8 @@ $('#nbody').addEventListener('pointermove', e => {
 });
 function endDrag(){
   if (!drag) return;
-  const { rows, idx, to } = drag; drag = null;
-  if (idx !== to){
-    const order = rows.map(r => r.dataset.id);
-    const [m] = order.splice(idx,1); order.splice(to,0,m);
-    const openItems = order.map(id => cur.items[findItem(id)]);
-    let k = 0; cur.items = cur.items.map(it => it.done ? it : openItems[k++]);
-    changed(true);
-  }
+  const { idx, to } = drag; drag = null;
+  if (idx !== to){ const [m] = cur.items.splice(idx,1); cur.items.splice(to,0,m); changed(true); }
   renderChecklist();
 }
 $('#nbody').addEventListener('pointerup', endDrag);
@@ -670,10 +686,10 @@ $('#hMore').onclick = () => {
   document.activeElement?.blur();
   const rows = [];
   rows.push({label: cur.pinned ? '取消釘選' : '釘選到最上方', fn:()=>{ cur.pinned=!cur.pinned; touch(); toast(cur.pinned?'已釘選':'已取消釘選'); }});
-  rows.push({label: cur.type==='text' ? '轉為清單（每行一項）' : '轉為文字', fn:convert});
+  rows.push({label: cur.type==='text' ? '轉為清單（每行一條）' : '轉為文字', fn:convert});
   if (cur.type==='check' && cur.items.some(i=>i.done)){
-    rows.push({label:'全部取消勾選', fn:()=>{ cur.items.forEach(i=>i.done=false); changed(true); renderChecklist(); paintMeta(); }});
-    rows.push({label:'刪除已完成項目', fn:()=>{ cur.items = cur.items.filter(i=>!i.done); changed(true); renderChecklist(); paintMeta(); }});
+    rows.push({label:'全部恢復（取消劃線）', fn:()=>{ cur.items.forEach(i=>i.done=false); changed(true); renderChecklist(); }});
+    rows.push({label:'清掉劃掉的行', fn:()=>{ cur.items = cur.items.filter(i=>!i.done); if(!cur.items.length) cur.items=[{id:uid(),t:'',done:false}]; changed(true); renderChecklist(); }});
   }
   rows.push({label:'分享', fn:()=>{
     const txt = (cur.title ? cur.title+'\n\n' : '') + plain(cur);
