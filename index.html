@@ -7,489 +7,642 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="記事本">
-<meta name="theme-color" content="#f6f3ee">
+<meta name="theme-color" content="#f2f2f2">
 <link rel="apple-touch-icon" href="icon.png">
 <title>記事本</title>
 <style>
 :root{
-  --bg:#f6f3ee; --surface:#ffffff; --text:#2b2a28; --muted:#8a867f; --line:#e6e1d8;
-  --accent:#2b2a28; --shadow:0 1px 2px rgba(0,0,0,.06),0 2px 8px rgba(0,0,0,.05);
-  --c-yellow:#fbe9a6; --c-orange:#fbd3a8; --c-red:#f6b8b3; --c-pink:#f4c4dc; --c-purple:#d7c7f0;
-  --c-blue:#bcd8f5; --c-green:#c6e6bf; --c-gray:#dcdad6; --c-white:#ffffff;
-}
-@media (prefers-color-scheme: dark){
-  :root{
-    --bg:#1b1a19; --surface:#262524; --text:#ece9e4; --muted:#9a958d; --line:#363431;
-    --accent:#ece9e4; --shadow:0 1px 2px rgba(0,0,0,.4);
-    --c-yellow:#5a4e22; --c-orange:#5c3f22; --c-red:#5a2c29; --c-pink:#55304a; --c-purple:#3f3558;
-    --c-blue:#26405a; --c-green:#2d4a2a; --c-gray:#3a3936; --c-white:#2e2d2b;
-  }
+  --app:#f2f2f2; --bar:#ececec; --line:#d6d6d6; --text:#1f1f1f; --muted:#6b6b6b;
+  --teal:#11998b;
+  --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
-  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;font-size:16px}
+html,body{margin:0;height:100%;background:var(--app);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif;font-size:17px}
 body{overscroll-behavior-y:none}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
-input,textarea{font:inherit;color:inherit;background:none;border:0;outline:0}
+input,textarea{font:inherit;color:inherit;outline:0}
 .hidden{display:none!important}
+svg{display:block}
+.ib{width:44px;height:44px;display:grid;place-items:center;border-radius:50%;flex:none}
+.ib:active{background:rgba(0,0,0,.08)}
+.ib svg{width:26px;height:26px}
 
-/* ---------- list view ---------- */
-header{position:sticky;top:0;z-index:5;background:var(--bg);
-  padding:calc(env(safe-area-inset-top) + 10px) 16px 8px}
-.toprow{display:flex;align-items:center;gap:8px}
-.toprow h1{font-size:28px;margin:0;flex:1;letter-spacing:.5px}
-.iconbtn{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:20px}
-.iconbtn:active{background:var(--line)}
-.search{margin-top:10px;display:flex;align-items:center;gap:8px;background:var(--surface);
-  border-radius:12px;padding:9px 12px;box-shadow:var(--shadow)}
-.search input{flex:1;min-width:0}
-.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0 4px;scrollbar-width:none}
-.chips::-webkit-scrollbar{display:none}
-.chip{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid transparent;box-shadow:var(--shadow)}
-.chip.all{width:auto;padding:0 12px;border-radius:15px;background:var(--surface);font-size:14px}
-.chip.on{border-color:var(--accent)}
-.section-label{font-size:13px;color:var(--muted);margin:14px 16px 6px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
-.card{border-radius:14px;padding:12px;min-height:76px;box-shadow:var(--shadow);text-align:left;
-  display:flex;flex-direction:column;gap:6px;overflow:hidden;width:100%}
-.card:active{transform:scale(.98)}
-.card .t{font-weight:600;font-size:15px;line-height:1.3;word-break:break-word}
-.card .b{font-size:13.5px;line-height:1.45;opacity:.85;white-space:pre-wrap;word-break:break-word;
-  display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
-.card .meta{font-size:11px;opacity:.55;margin-top:auto;display:flex;gap:6px;align-items:center}
-.card .ci{display:flex;gap:6px;font-size:13.5px;line-height:1.4}
-.card .ci.done{text-decoration:line-through;opacity:.5}
-.empty{text-align:center;color:var(--muted);padding:60px 20px;line-height:1.7}
-.fab{position:fixed;right:20px;bottom:calc(env(safe-area-inset-bottom) + 20px);width:58px;height:58px;
-  border-radius:50%;background:var(--accent);color:var(--bg);font-size:30px;box-shadow:0 4px 14px rgba(0,0,0,.25);z-index:6}
-.spacer{height:110px}
+/* ================= LIST ================= */
+#listView{min-height:100%;display:flex;flex-direction:column}
+.lhead{position:sticky;top:0;z-index:5;background:var(--bar);border-bottom:1px solid var(--line)}
+.lbar{display:flex;align-items:center;gap:4px;padding:calc(var(--safe-t) + 6px) 6px 6px 16px;min-height:56px}
+.lbar h1{flex:1;margin:0;font-size:26px;font-weight:500;color:#555;letter-spacing:.5px}
+.lbar input{flex:1;min-width:0;font-size:18px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.colorgrid{width:26px;height:26px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.colorgrid i{display:block}
+.sortbar{display:block;width:calc(100% - 16px);margin:0 8px 8px;background:#fafafa;border:1px solid var(--line);
+  padding:9px;text-align:center;font-size:18px}
+.filtertag{font-size:14px;color:var(--muted);text-align:center;margin:-2px 0 8px}
+#list{flex:1;padding:6px 8px calc(var(--safe-b) + 150px)}
+.row{display:flex;align-items:center;width:100%;min-height:68px;margin-bottom:6px;text-align:left;
+  border-left:5px solid;padding:10px 12px 10px 14px;gap:10px;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.row:active{filter:brightness(.95)}
+.row .rt{flex:1;font-size:21px;line-height:1.3;word-break:break-word;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.row .rd{flex:none;display:flex;align-items:center;gap:6px;font-size:16px;color:#555;text-align:right;max-width:110px}
+.row .rd svg{width:20px;height:20px;flex:none}
+.row .pin{font-size:14px}
+.empty{text-align:center;color:var(--muted);padding:70px 20px;line-height:1.8}
+.fab{position:fixed;right:18px;bottom:calc(var(--safe-b) + 78px);width:62px;height:62px;border-radius:18px;
+  background:var(--teal);color:#fff;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:6}
+.fab svg{width:30px;height:30px}
+.bnav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--bar);border-top:1px solid var(--line);
+  display:flex;padding-bottom:var(--safe-b)}
+.bnav button{flex:1;height:60px;display:grid;place-items:center;color:#666}
+.bnav button.on{color:var(--teal)}
+.bnav svg{width:28px;height:28px}
 
-/* ---------- sheets ---------- */
-.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:20;display:flex;align-items:flex-end}
-.sheet{background:var(--surface);width:100%;border-radius:18px 18px 0 0;
-  padding:10px 8px calc(env(safe-area-inset-bottom) + 10px)}
-.sheet button.row{display:flex;width:100%;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;text-align:left}
-.sheet button.row:active{background:var(--line)}
-.sheet .grab{width:36px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 8px}
-.danger{color:#d0443a}
+/* ================= NOTE ================= */
+#noteView{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:var(--bg)}
+.nhead{background:var(--hd);display:flex;align-items:center;gap:6px;
+  padding:calc(var(--safe-t) + 6px) 6px 6px 6px;min-height:58px}
+.nhead .ttl{flex:1;min-width:0;font-size:24px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-left:6px}
+.nhead input{flex:1;min-width:0;font-size:22px;background:rgba(255,255,255,.85);border:1px solid rgba(0,0,0,.2);padding:7px 8px;border-radius:2px}
+.swatch{width:40px;height:40px;border-radius:6px;border:1px solid rgba(0,0,0,.25);background:var(--hd);filter:saturate(1.4) brightness(.92);flex:none;margin:0 6px}
+.nmeta{display:flex;justify-content:space-between;padding:6px 12px;font-size:17px;color:rgba(0,0,0,.55)}
+.nbody{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.lined{background-image:repeating-linear-gradient(to bottom, transparent 0, transparent 43px, var(--rule) 43px, var(--rule) 44px);
+  background-attachment:local;line-height:44px;font-size:20px;padding:0 12px;min-height:100%}
+#nText{white-space:pre-wrap;word-break:break-word;padding-bottom:120px}
+#eText{display:block;width:100%;border:0;resize:none;background-color:transparent;min-height:100%;padding-bottom:120px}
+.ci{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--rule);min-height:64px;padding:8px 4px 8px 14px;width:100%;text-align:left}
+.ci .ct{flex:1;font-size:21px;line-height:1.45;word-break:break-word;white-space:pre-wrap}
+.ci.done .ct{text-decoration:line-through;color:rgba(0,0,0,.4)}
+.ci .ck{width:40px;display:grid;place-items:center;color:rgba(0,0,0,.45);flex:none}
+.ci .ck svg{width:28px;height:28px}
+.ci .dots{width:36px;height:44px;display:grid;place-items:center;color:rgba(0,0,0,.45);flex:none}
+.ci .dots svg{width:22px;height:22px}
+.ci input{flex:1;min-width:0;font-size:20px;background:transparent;border:0;padding:6px 0}
+.ci .del{width:40px;height:40px;display:grid;place-items:center;color:rgba(0,0,0,.4);flex:none;font-size:20px}
+.addrow{display:flex;align-items:center;gap:10px;padding:16px 14px;font-size:19px;color:rgba(0,0,0,.5);width:100%}
+.ubar{display:flex;justify-content:center;gap:60px;padding:8px 0 calc(var(--safe-b) + 8px);border-top:1px solid rgba(0,0,0,.12);background:var(--bg)}
+.ubar button{width:56px;height:40px;display:grid;place-items:center;color:rgba(0,0,0,.55)}
+.ubar button:disabled{opacity:.3}
+.ubar svg{width:28px;height:28px}
 
-/* ---------- editor ---------- */
-#editor{position:fixed;inset:0;z-index:10;display:flex;flex-direction:column;background:var(--c-yellow)}
-.ebar{display:flex;align-items:center;gap:4px;padding:calc(env(safe-area-inset-top) + 6px) 8px 6px}
-.ebar .grow{flex:1}
-.ebody{flex:1;overflow-y:auto;padding:4px 20px calc(env(safe-area-inset-bottom) + 40px);-webkit-overflow-scrolling:touch}
-#eTitle{width:100%;font-size:22px;font-weight:700;padding:6px 0 10px}
-#eText{width:100%;min-height:60vh;resize:none;line-height:1.65;font-size:17px}
-.item{display:flex;align-items:flex-start;gap:10px;padding:6px 0}
-.item .box{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid currentColor;opacity:.7;
-  margin-top:2px;display:grid;place-items:center;font-size:14px}
-.item.done .box{background:currentColor}
-.item.done .box::after{content:"✓";color:var(--c-yellow);filter:invert(1) grayscale(1) contrast(9)}
-.item textarea{flex:1;resize:none;line-height:1.5;font-size:17px;height:26px;overflow:hidden}
-.item.done textarea{text-decoration:line-through;opacity:.5}
-.item .x{flex:none;opacity:.35;font-size:18px;width:24px}
-.additem{display:flex;gap:10px;align-items:center;opacity:.6;padding:10px 0;font-size:17px}
-.donehdr{font-size:13px;opacity:.6;margin:14px 0 2px}
-.palette{display:flex;flex-wrap:wrap;gap:12px;padding:8px 16px 12px;justify-content:center}
-.palette button{width:42px;height:42px;border-radius:50%;border:2px solid var(--line)}
-.palette button.on{border:3px solid var(--accent)}
-.etime{font-size:12px;opacity:.5;margin-top:24px}
-.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);
-  background:var(--accent);color:var(--bg);padding:10px 16px;border-radius:20px;font-size:14px;z-index:40;
-  display:flex;gap:14px;align-items:center;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-.toast button{font-weight:700;text-decoration:underline}
+/* ================= DIALOG / SHEET ================= */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px}
+.backdrop.bottom{align-items:flex-end;padding:0}
+.dlg{background:#efefef;border-radius:26px;width:100%;max-width:420px;padding:26px 24px 14px}
+.dlg h3{margin:0 0 18px;font-size:26px;font-weight:500}
+.dlg textarea{width:100%;min-height:110px;border:2px solid var(--teal);border-radius:6px;padding:12px;font-size:19px;line-height:1.6;resize:none;background:#efefef}
+.dlg .acts{display:flex;justify-content:flex-end;gap:30px;margin-top:16px}
+.dlg .acts button{color:var(--teal);font-size:19px;padding:10px 6px}
+.sheet{background:#fff;width:100%;border-radius:16px 16px 0 0;padding:8px 0 calc(var(--safe-b) + 8px);max-height:80vh;overflow:auto}
+.sheet h4{margin:8px 20px 6px;font-size:15px;color:var(--muted);font-weight:500}
+.sheet .opt{display:flex;align-items:center;gap:14px;width:100%;padding:15px 20px;text-align:left;font-size:18px}
+.sheet .opt:active{background:#f0f0f0}
+.sheet .opt.danger{color:#d0443a}
+.sheet .opt .dot{width:24px;height:24px;border-radius:5px;border:1px solid rgba(0,0,0,.2);flex:none}
+.sheet .opt .on{margin-left:auto;color:var(--teal);font-weight:700}
+.palette{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:10px 20px 18px}
+.palette button{aspect-ratio:1;border-radius:10px;border:1px solid rgba(0,0,0,.2)}
+.palette button.on{outline:3px solid var(--teal);outline-offset:2px}
+.toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 150px);transform:translateX(-50%);z-index:50;
+  background:#333;color:#fff;padding:11px 18px;border-radius:22px;font-size:15px;display:flex;gap:16px;align-items:center;white-space:nowrap}
+.toast button{color:#7fe0d4;font-weight:700}
 </style>
 </head>
 <body>
 
-<!-- ===== LIST VIEW ===== -->
+<!-- ============ LIST ============ -->
 <div id="listView">
-  <header>
-    <div class="toprow">
-      <h1 id="viewTitle">記事本</h1>
-      <button class="iconbtn" id="sortBtn" aria-label="排序">⇅</button>
-      <button class="iconbtn" id="menuBtn" aria-label="選單">⋯</button>
+  <div class="lhead">
+    <div class="lbar" id="lbar">
+      <h1 id="lTitle">記事本</h1>
+      <input id="q" type="search" class="hidden" placeholder="搜尋筆記" autocomplete="off">
+      <button class="ib" id="filterBtn" aria-label="依顏色篩選"><span class="colorgrid" id="cgrid"></span></button>
+      <button class="ib" id="lMore" aria-label="選單"></button>
     </div>
-    <div class="search">🔍<input id="q" type="search" placeholder="搜尋筆記" autocomplete="off"></div>
-    <div class="chips" id="chips"></div>
-  </header>
+    <button class="sortbar" id="sortBtn"></button>
+    <div class="filtertag hidden" id="filterTag"></div>
+  </div>
   <main id="list"></main>
-  <div class="spacer"></div>
-  <button class="fab" id="fab" aria-label="新增">＋</button>
+  <button class="fab" id="fab" aria-label="新增筆記"></button>
+  <nav class="bnav">
+    <button id="navNotes" class="on" aria-label="筆記"></button>
+    <button id="navSearch" aria-label="搜尋"></button>
+    <button id="navTrash" aria-label="垃圾桶"></button>
+    <button id="navMenu" aria-label="選單"></button>
+  </nav>
 </div>
 
-<!-- ===== EDITOR ===== -->
-<div id="editor" class="hidden">
-  <div class="ebar">
-    <button class="iconbtn" id="eBack" aria-label="返回">‹</button>
-    <div class="grow"></div>
-    <button class="iconbtn" id="eConvert" aria-label="切換清單／文字">☑︎</button>
-    <button class="iconbtn" id="eColor" aria-label="顏色">🎨</button>
-    <button class="iconbtn" id="ePin" aria-label="釘選">📌</button>
-    <button class="iconbtn" id="eMore" aria-label="更多">⋯</button>
-  </div>
-  <div class="ebody" id="ebody">
-    <input id="eTitle" placeholder="標題" autocomplete="off">
-    <textarea id="eText" placeholder="開始輸入…"></textarea>
-    <div id="eList" class="hidden"></div>
-    <div class="etime" id="eTime"></div>
+<!-- ============ NOTE ============ -->
+<div id="noteView" class="hidden">
+  <div class="nhead" id="nhead"></div>
+  <div class="nmeta"><span id="mLeft"></span><span id="mRight"></span></div>
+  <div class="nbody" id="nbody"></div>
+  <div class="ubar hidden" id="ubar">
+    <button id="undoBtn" aria-label="復原"></button>
+    <button id="redoBtn" aria-label="重做"></button>
   </div>
 </div>
 
-<div id="sheetHost"></div>
+<div id="overlay"></div>
 <input type="file" id="importFile" accept="application/json,.json" class="hidden">
 
 <script>
 (() => {
-const KEY = 'colornotes.v1';
-const COLORS = ['yellow','orange','red','pink','purple','blue','green','gray','white'];
-const COLOR_NAMES = {yellow:'黃',orange:'橘',red:'紅',pink:'粉',purple:'紫',blue:'藍',green:'綠',gray:'灰',white:'白'};
-const SORTS = {updated:'最近修改', created:'建立時間', color:'顏色', title:'標題'};
+/* ---------------- icons ---------------- */
+const I = {
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5M11 5l-7 7 7 7"/></svg>',
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5L20 7"/></svg>',
+  pencil:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25zm17.7-10.2a1 1 0 0 0 0-1.42l-2.33-2.33a1 1 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>',
+  dots:'<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19" r="2.2"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  notes:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 5v2h8V8H8zm0 4v2h8v-2H8zm0 4v2h5v-2H8zM7 1h2v4H7zm4 0h2v4h-2zm4 0h2v4h-2z"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
+  menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
+  undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v1"/></svg>',
+  redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0-6 6v1"/></svg>',
+};
 
+/* ---------------- colors ---------------- */
+const COLORS = {
+  yellow:{bg:'#fdf7bf', hd:'#f5da6b', rule:'#f1e27c', name:'黃'},
+  orange:{bg:'#fde3c7', hd:'#f6b26f', rule:'#f3c793', name:'橘'},
+  red:   {bg:'#fbd5d1', hd:'#ec8a80', rule:'#f0aca5', name:'紅'},
+  purple:{bg:'#e6dcf4', hd:'#ad95da', rule:'#cdbbe8', name:'紫'},
+  blue:  {bg:'#d6e8f9', hd:'#83b5e7', rule:'#aecdee', name:'藍'},
+  green: {bg:'#d9f1d1', hd:'#93d083', rule:'#b4e0a8', name:'綠'},
+  gray:  {bg:'#e9e9e9', hd:'#b9b9b9', rule:'#d0d0d0', name:'灰'},
+  black: {bg:'#d4d4d4', hd:'#5a5a5a', rule:'#bdbdbd', name:'黑'},
+  white: {bg:'#ffffff', hd:'#e2e2e2', rule:'#ececec', name:'白'},
+};
+const CKEYS = Object.keys(COLORS);
+const col = c => COLORS[c] || COLORS.yellow;
+const SORTS = {updated:'依修改的時間排序', created:'依建立的時間排序', title:'依標題排序', color:'依顏色排序'};
+
+/* ---------------- storage ---------------- */
+const KEY = 'colornotes.v1';
 let state = load();
-let ui = { filter:'all', q:'', view:'notes', sort: state.sort || 'updated' };
-let cur = null; // note being edited
+let ui = { view:'notes', filter:'all', q:'', searching:false, sort: state.sort || 'updated' };
+let cur = null, editing = false, hist = [], hpos = -1, histTimer = null;
 
 function load(){
-  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && Array.isArray(s.notes)) return s; } catch(e){}
+  try {
+    const s = JSON.parse(localStorage.getItem(KEY));
+    if (s && Array.isArray(s.notes)){
+      s.notes.forEach(n => { if (!COLORS[n.color]) n.color = n.color==='pink' ? 'red' : 'yellow'; });
+      return s;
+    }
+  } catch(e){}
   return { notes: [], sort:'updated' };
 }
 function save(){
   state.sort = ui.sort;
-  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('儲存失敗：空間不足？'); }
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){ toast('儲存失敗：空間不足'); }
 }
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
-const $ = s => document.querySelector(s);
-const esc = s => s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const cvar = c => `var(--c-${c})`;
+try { navigator.storage && navigator.storage.persist && navigator.storage.persist(); } catch(e){}
 
-function fmt(ts){
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const p2 = x => String(x).padStart(2,'0');
+
+function listDate(ts){
   const d = new Date(ts), n = new Date();
-  const p = x => String(x).padStart(2,'0');
-  if (d.toDateString() === n.toDateString()) return `${p(d.getHours())}:${p(d.getMinutes())}`;
-  if (d.getFullYear() === n.getFullYear()) return `${d.getMonth()+1}/${d.getDate()}`;
+  if (d.toDateString() === n.toDateString()) return `${p2(d.getHours())}:${p2(d.getMinutes())}`;
+  if (d.getFullYear() === n.getFullYear()) return `${d.getMonth()+1}月${d.getDate()}日`;
   return `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
 }
-function isEmpty(n){
-  return !n.title.trim() && (n.type === 'text' ? !n.body.trim() : n.items.every(i => !i.t.trim()));
+function fullDate(ts){
+  const d = new Date(ts);
+  return `${d.getFullYear()}/${p2(d.getMonth()+1)}/${p2(d.getDate())} ${p2(d.getHours())}:${p2(d.getMinutes())}`;
 }
-function plain(n){
-  return n.type === 'text' ? n.body : n.items.map(i => (i.done?'☑ ':'☐ ') + i.t).join('\n');
+function ago(ts){
+  const s = (Date.now()-ts)/1000;
+  if (s < 60) return '剛剛';
+  if (s < 3600) return `${Math.floor(s/60)} 分鐘前`;
+  if (s < 86400) return `${Math.floor(s/3600)} 小時前`;
+  if (s < 86400*30) return `${Math.floor(s/86400)} 天前`;
+  if (s < 86400*365) return `${Math.floor(s/86400/30)} 個月前`;
+  return `${Math.floor(s/86400/365)} 年前`;
 }
+const plain = n => n.type==='text' ? n.body : n.items.map(i=>(i.done?'✓ ':'□ ')+i.t).join('\n');
+const label = n => n.title.trim() || plain(n).split('\n').find(l=>l.trim())?.replace(/^[✓□] /,'') || '（無標題）';
+const isEmpty = n => !n.title.trim() && (n.type==='text' ? !n.body.trim() : n.items.every(i=>!i.t.trim()));
 
-/* ---------- list rendering ---------- */
-function renderChips(){
-  const el = $('#chips');
-  let h = `<button class="chip all ${ui.filter==='all'?'on':''}" data-c="all">全部</button>`;
-  for (const c of COLORS) h += `<button class="chip ${ui.filter===c?'on':''}" data-c="${c}" style="background:${cvar(c)}" aria-label="${COLOR_NAMES[c]}"></button>`;
-  el.innerHTML = h;
-}
-function sortFn(a,b){
-  switch(ui.sort){
-    case 'created': return b.created - a.created;
-    case 'color': return COLORS.indexOf(a.color) - COLORS.indexOf(b.color) || b.updated - a.updated;
-    case 'title': return (a.title||plain(a)).localeCompare(b.title||plain(b), 'zh-Hant');
-    default: return b.updated - a.updated;
-  }
-}
-function cardHTML(n){
-  let body = '';
-  if (n.type === 'text') body = `<div class="b">${esc(n.body)}</div>`;
-  else {
-    const items = [...n.items.filter(i=>!i.done), ...n.items.filter(i=>i.done)].filter(i=>i.t.trim()).slice(0,6);
-    body = items.map(i => `<div class="ci ${i.done?'done':''}">${i.done?'☑':'☐'} <span>${esc(i.t)}</span></div>`).join('');
-  }
-  const cnt = n.type==='check' ? ` · ${n.items.filter(i=>i.done&&i.t.trim()).length}/${n.items.filter(i=>i.t.trim()).length}` : '';
-  return `<button class="card" data-id="${n.id}" style="background:${cvar(n.color)}">
-    ${n.title ? `<div class="t">${esc(n.title)}</div>` : ''}${body}
-    <div class="meta">${n.pinned?'📌':''}${fmt(n.updated)}${cnt}</div></button>`;
-}
+/* ---------------- static icons ---------------- */
+$('#lMore').innerHTML = I.dots;
+$('#fab').innerHTML = I.plus;
+$('#navNotes').innerHTML = I.notes;
+$('#navSearch').innerHTML = I.search;
+$('#navTrash').innerHTML = I.trash;
+$('#navMenu').innerHTML = I.menu;
+$('#undoBtn').innerHTML = I.undo;
+$('#redoBtn').innerHTML = I.redo;
+
+/* ================= LIST ================= */
 function renderList(){
-  $('#viewTitle').textContent = ui.view === 'trash' ? '垃圾桶' : '記事本';
-  $('#fab').classList.toggle('hidden', ui.view === 'trash');
+  const trash = ui.view === 'trash';
+  $('#lTitle').textContent = trash ? '垃圾桶' : '記事本';
+  $('#lTitle').classList.toggle('hidden', ui.searching);
+  $('#q').classList.toggle('hidden', !ui.searching);
+  $('#fab').classList.toggle('hidden', trash);
+  $('#sortBtn').textContent = SORTS[ui.sort] + ' ▾';
+  $('#navNotes').classList.toggle('on', !trash && !ui.searching);
+  $('#navSearch').classList.toggle('on', ui.searching);
+  $('#navTrash').classList.toggle('on', trash);
+  $('#cgrid').innerHTML = ui.filter === 'all'
+    ? ['#5ab4dc','#e5dc2c','#9a9ac8','#ef6a3c'].map(c=>`<i style="background:${c}"></i>`).join('')
+    : `<i style="background:${col(ui.filter).hd};grid-column:1/3;grid-row:1/3;border-radius:3px"></i>`;
+  const ft = $('#filterTag');
+  ft.classList.toggle('hidden', ui.filter==='all');
+  ft.textContent = ui.filter==='all' ? '' : `只顯示${col(ui.filter).name}色　·　點右上色塊切換`;
+
   const q = ui.q.trim().toLowerCase();
-  let notes = state.notes.filter(n => ui.view === 'trash' ? n.deleted : !n.deleted)
-    .filter(n => ui.filter === 'all' || n.color === ui.filter)
-    .filter(n => !q || (n.title + '\n' + plain(n)).toLowerCase().includes(q))
-    .sort(sortFn);
+  let notes = state.notes.filter(n => trash ? n.deleted : !n.deleted)
+    .filter(n => ui.filter==='all' || n.color===ui.filter)
+    .filter(n => !q || (n.title+'\n'+plain(n)).toLowerCase().includes(q));
+  notes.sort((a,b) => {
+    if (!trash && a.pinned !== b.pinned) return a.pinned ? -1 : 1;
+    switch(ui.sort){
+      case 'created': return b.created - a.created;
+      case 'title': return label(a).localeCompare(label(b), 'zh-Hant');
+      case 'color': return CKEYS.indexOf(a.color)-CKEYS.indexOf(b.color) || b.updated-a.updated;
+      default: return b.updated - a.updated;
+    }
+  });
   const el = $('#list');
   if (!notes.length){
-    el.innerHTML = `<div class="empty">${ui.view==='trash' ? '垃圾桶是空的' : (q||ui.filter!=='all' ? '找不到符合的筆記' : '還沒有筆記<br>點右下角 ＋ 開始寫')}</div>`;
+    el.innerHTML = `<div class="empty">${trash ? '垃圾桶是空的' : (q||ui.filter!=='all' ? '找不到符合的筆記' : '還沒有筆記<br>點右下角 ＋ 開始寫')}</div>`;
     return;
   }
-  const pinned = ui.view==='notes' ? notes.filter(n=>n.pinned) : [];
-  const rest = ui.view==='notes' ? notes.filter(n=>!n.pinned) : notes;
-  let h = '';
-  if (pinned.length){
-    h += `<div class="section-label">釘選</div><div class="grid">${pinned.map(cardHTML).join('')}</div>`;
-    if (rest.length) h += `<div class="section-label">其他</div>`;
-  }
-  if (ui.view==='trash') h += `<div class="section-label">點一下可還原或永久刪除</div>`;
-  h += `<div class="grid" style="${pinned.length?'':'margin-top:8px'}">${rest.map(cardHTML).join('')}</div>`;
-  el.innerHTML = h;
+  el.innerHTML = notes.map(n => {
+    const c = col(n.color);
+    return `<button class="row" data-id="${n.id}" style="background:${c.bg};border-left-color:${c.hd}">
+      <span class="rt">${esc(label(n))}</span>
+      <span class="rd">${n.pinned?'<span class="pin">📌</span>':''}${n.type==='check'?I.check:''}<span>${listDate(n.updated)}</span></span>
+    </button>`;
+  }).join('');
 }
-function render(){ renderChips(); renderList(); }
 
-/* ---------- sheets / toast ---------- */
-function sheet(rows, extraHTML=''){
-  const host = $('#sheetHost');
-  host.innerHTML = `<div class="backdrop"><div class="sheet"><div class="grab"></div>${extraHTML}
-    ${rows.map((r,i)=>`<button class="row ${r.danger?'danger':''}" data-i="${i}">${r.icon||''} ${r.label}</button>`).join('')}</div></div>`;
-  const bd = host.firstChild;
-  bd.addEventListener('click', e => {
-    if (e.target === bd) return close();
-    const b = e.target.closest('button.row');
-    if (b){ close(); rows[+b.dataset.i].fn(); }
-  });
-  function close(){ host.innerHTML = ''; }
-  return { el: bd, close };
+$('#list').onclick = e => {
+  const r = e.target.closest('.row'); if (!r) return;
+  const n = state.notes.find(x => x.id === r.dataset.id);
+  if (ui.view === 'trash'){
+    sheet([
+      {label:'還原', fn:()=>{ n.deleted=false; save(); renderList(); toast('已還原'); }},
+      {label:'永久刪除', danger:true, fn:()=>{ state.notes=state.notes.filter(x=>x!==n); save(); renderList(); }},
+    ], label(n));
+  } else openNote(n, false);
+};
+$('#fab').onclick = () => sheet([
+  {label:'文字', fn:()=>newNote('text')},
+  {label:'清單', fn:()=>newNote('check')},
+], '新增');
+$('#sortBtn').onclick = () => sheet(Object.entries(SORTS).map(([k,v])=>({
+  label:v, on: ui.sort===k, fn:()=>{ ui.sort=k; save(); renderList(); }
+})), '排序方式');
+$('#filterBtn').onclick = () => sheet([
+  {label:'全部顏色', on: ui.filter==='all', fn:()=>{ ui.filter='all'; renderList(); }},
+  ...CKEYS.map(k=>({ label:col(k).name+'色', dot:col(k).hd, on:ui.filter===k, fn:()=>{ ui.filter=k; renderList(); } }))
+], '依顏色篩選');
+$('#q').addEventListener('input', e => { ui.q = e.target.value; renderList(); });
+
+$('#navNotes').onclick = () => { ui.view='notes'; ui.searching=false; ui.q=''; $('#q').value=''; renderList(); scrollTo(0,0); };
+$('#navSearch').onclick = () => {
+  ui.searching = !ui.searching;
+  if (!ui.searching){ ui.q=''; $('#q').value=''; }
+  renderList(); if (ui.searching) $('#q').focus();
+};
+$('#navTrash').onclick = () => { ui.view = ui.view==='trash' ? 'notes' : 'trash'; renderList(); scrollTo(0,0); };
+$('#navMenu').onclick = $('#lMore').onclick = () => {
+  if (ui.view === 'trash'){
+    const cnt = state.notes.filter(n=>n.deleted).length;
+    return sheet([
+      {label:'回到記事本', fn:()=>{ ui.view='notes'; renderList(); }},
+      {label:`清空垃圾桶（${cnt}）`, danger:true, fn:()=> confirmDlg('永久刪除垃圾桶裡的所有筆記？', ()=>{
+        state.notes = state.notes.filter(n=>!n.deleted); save(); renderList(); }) },
+    ]);
+  }
+  sheet([
+    {label:'匯出備份', fn:exportData},
+    {label:'匯入備份', fn:()=>$('#importFile').click()},
+    {label:`共 ${state.notes.filter(n=>!n.deleted).length} 則筆記`, fn:()=>{}},
+  ], '選單');
+};
+
+/* ================= NOTE ================= */
+function newNote(type){
+  const n = { id:uid(), type, title:'', body:'', items:[], color: ui.filter!=='all' ? ui.filter : 'yellow',
+    pinned:false, deleted:false, created:Date.now(), updated:Date.now() };
+  state.notes.push(n);
+  openNote(n, true);
 }
-let toastTimer;
+function openNote(n, edit){
+  cur = n; editing = edit;
+  hist = []; hpos = -1; snapshot(true);
+  $('#noteView').classList.remove('hidden');
+  paint();
+  if (edit) focusFirst();
+}
+function setTheme(){
+  const c = col(cur.color), v = $('#noteView').style;
+  v.setProperty('--bg', c.bg); v.setProperty('--hd', c.hd); v.setProperty('--rule', c.rule);
+  document.querySelector('meta[name=theme-color]').content = c.hd;
+  $('#nhead').style.color = cur.color==='black' ? '#fff' : '#1f1f1f';
+}
+function paint(){
+  setTheme();
+  const h = $('#nhead');
+  if (editing){
+    h.innerHTML = `<button class="ib" id="hDone" aria-label="完成">${I.check}</button>
+      <input id="eTitle" placeholder="標題" autocomplete="off" value="${esc(cur.title)}">
+      <button class="swatch" id="hColor" aria-label="顏色"></button>
+      <button class="ib" id="hMore" aria-label="更多">${I.dots}</button>`;
+    $('#eTitle').addEventListener('input', e => { cur.title = e.target.value; changed(); });
+    $('#eTitle').addEventListener('keydown', e => { if (e.key==='Enter'){ e.preventDefault(); focusFirst(true); } });
+    $('#hDone').onclick = () => finishEdit();
+    $('#hColor').onclick = pickColor;
+  } else {
+    h.innerHTML = `<button class="ib" id="hBack" aria-label="返回">${I.back}</button>
+      <div class="ttl">${esc(cur.title || '（無標題）')}</div>
+      <button class="ib" id="hEdit" aria-label="編輯">${I.pencil}</button>
+      <button class="ib" id="hMore" aria-label="更多">${I.dots}</button>`;
+    $('#hBack').onclick = closeNote;
+    $('#hEdit').onclick = () => { editing = true; paint(); focusFirst(); };
+  }
+  $('#hMore').onclick = noteMenu;
+  paintMeta();
+  paintBody();
+  $('#ubar').classList.toggle('hidden', !editing);
+  updUndo();
+}
+function paintMeta(){
+  $('#mLeft').textContent = editing ? '編輯中' : ago(cur.updated);
+  $('#mRight').textContent = fullDate(cur.updated);
+}
+function paintBody(keepFocus){
+  const b = $('#nbody');
+  if (cur.type === 'text'){
+    if (editing){
+      if (!$('#eText')){
+        b.innerHTML = `<div class="lined"><textarea id="eText" placeholder=""></textarea></div>`;
+        const t = $('#eText');
+        t.addEventListener('input', () => { cur.body = t.value; sizeText(); changed(); });
+      }
+      $('#eText').value = cur.body; sizeText();
+    } else {
+      b.innerHTML = `<div class="lined" id="nText">${esc(cur.body) || '<span style="opacity:.4">點兩下開始編輯</span>'}</div>`;
+      $('#nText').ondblclick = () => { editing = true; paint(); focusFirst(); };
+    }
+    return;
+  }
+  // checklist
+  if (editing){
+    b.innerHTML = cur.items.map((it,i)=>`<div class="ci ${it.done?'done':''}" data-i="${i}">
+        <input value="${esc(it.t)}" enterkeyhint="next" placeholder="項目">
+        <button class="del" aria-label="刪除項目">✕</button></div>`).join('')
+      + `<button class="addrow" id="addItem">${'＋'} 新增項目</button>`;
+  } else {
+    b.innerHTML = (cur.items.length ? cur.items.map((it,i)=>`<div class="ci ${it.done?'done':''}" data-i="${i}">
+        <span class="ct">${esc(it.t)}</span>
+        ${it.done ? `<span class="ck">${I.check}</span>` : `<button class="dots" aria-label="項目選單">${I.dots}</button>`}
+      </div>`).join('') : `<div class="ci"><span class="ct" style="opacity:.4">還沒有項目，點右上鉛筆新增</span></div>`)
+      + `<div style="height:120px"></div>`;
+  }
+}
+function sizeText(){
+  const t = $('#eText'); if (!t) return;
+  t.style.height = 'auto';
+  t.style.height = Math.max(t.scrollHeight, $('#nbody').clientHeight) + 'px';
+}
+function focusFirst(fromTitle){
+  setTimeout(() => {
+    if (!fromTitle && !cur.title && cur.type==='check' && !cur.items.length){ $('#eTitle')?.focus(); return; }
+    if (cur.type==='text'){ const t=$('#eText'); t.focus(); t.setSelectionRange(t.value.length,t.value.length); }
+    else {
+      if (!cur.items.length || fromTitle && !cur.items.length){ addItem(cur.items.length); return; }
+      const ins = $('#nbody').querySelectorAll('.ci input'); if (ins.length) ins[ins.length-1].focus();
+      else if (!cur.title) $('#eTitle')?.focus();
+    }
+  }, 60);
+}
+
+/* --- checklist interactions --- */
+$('#nbody').addEventListener('click', e => {
+  if (cur.type !== 'check') return;
+  if (e.target.closest('#addItem')) return addItem(cur.items.length);
+  const row = e.target.closest('.ci[data-i]'); if (!row) return;
+  const i = +row.dataset.i;
+  if (editing){
+    if (e.target.closest('.del')){
+      const removed = cur.items.splice(i,1)[0]; changed(); paintBody();
+      toast('已刪除項目', {label:'復原', fn:()=>{ if(cur){ cur.items.splice(i,0,removed); changed(); paintBody(); } }});
+    }
+    return;
+  }
+  if (e.target.closest('.dots')) return itemMenu(i);
+  cur.items[i].done = !cur.items[i].done; touch(); paintBody(); paintMeta();
+});
+$('#nbody').addEventListener('input', e => {
+  const row = e.target.closest('.ci[data-i]'); if (!row || !editing) return;
+  cur.items[+row.dataset.i].t = e.target.value; changed();
+});
+$('#nbody').addEventListener('keydown', e => {
+  const row = e.target.closest('.ci[data-i]'); if (!row || e.target.tagName!=='INPUT') return;
+  const i = +row.dataset.i, inp = e.target;
+  if (e.key==='Enter' && !e.isComposing){
+    e.preventDefault();
+    if (!inp.value.trim() && i===cur.items.length-1){ inp.blur(); return; }
+    const pos = inp.selectionStart, after = inp.value.slice(pos);
+    cur.items[i].t = inp.value.slice(0,pos);
+    addItem(i+1, after);
+  } else if (e.key==='Backspace' && !inp.value && cur.items.length>1){
+    e.preventDefault(); cur.items.splice(i,1); changed(); paintBody();
+    const ins = $('#nbody').querySelectorAll('.ci input'); ins[Math.max(0,i-1)]?.focus();
+  }
+});
+function addItem(pos, text=''){
+  cur.items.splice(pos,0,{t:text,done:false}); changed(); paintBody();
+  const inp = $(`#nbody .ci[data-i="${pos}"] input`);
+  if (inp){ inp.focus(); inp.setSelectionRange(0,0); inp.scrollIntoView({block:'nearest'}); }
+}
+function itemMenu(i){
+  sheet([
+    {label:'編輯', fn:()=>editItemDlg(i)},
+    {label:'在下方插入項目', fn:()=>editItemDlg(i, true)},
+    {label:'刪除', danger:true, fn:()=>{
+      const removed = cur.items.splice(i,1)[0]; touch(); paintBody();
+      toast('已刪除項目', {label:'復原', fn:()=>{ if(cur){ cur.items.splice(i,0,removed); touch(); paintBody(); } }});
+    }},
+  ]);
+}
+function editItemDlg(i, insert){
+  dialog(insert ? '新增項目' : '編輯', insert ? '' : cur.items[i].t, v => {
+    if (insert){ if (v.trim()) cur.items.splice(i+1,0,{t:v,done:false}); }
+    else if (v.trim()) cur.items[i].t = v; else cur.items.splice(i,1);
+    touch(); paintBody(); paintMeta();
+  });
+}
+
+/* --- undo / redo (edit mode) --- */
+const snap = () => JSON.stringify({title:cur.title, body:cur.body, items:cur.items, type:cur.type});
+function snapshot(force){
+  const s = snap();
+  if (!force && hist[hpos] === s) return;
+  hist = hist.slice(0, hpos+1); hist.push(s); if (hist.length>200) hist.shift(); hpos = hist.length-1; updUndo();
+}
+function changed(){
+  touch();
+  clearTimeout(histTimer); histTimer = setTimeout(()=>snapshot(), 450);
+  $('#undoBtn').disabled = false;
+}
+function restore(s){
+  const o = JSON.parse(s);
+  Object.assign(cur, o); cur.updated = Date.now(); save();
+  $('#eTitle') && ($('#eTitle').value = cur.title);
+  paintBody(); updUndo();
+}
+$('#undoBtn').onclick = () => { clearTimeout(histTimer); snapshot(); if (hpos>0){ hpos--; restore(hist[hpos]); } };
+$('#redoBtn').onclick = () => { if (hpos<hist.length-1){ hpos++; restore(hist[hpos]); } };
+function updUndo(){ $('#undoBtn').disabled = hpos<=0; $('#redoBtn').disabled = hpos>=hist.length-1; }
+
+function touch(){ cur.updated = Date.now(); save(); }
+
+function finishEdit(){
+  document.activeElement?.blur();
+  if (cur.type==='check'){ const before = cur.items.length; cur.items = cur.items.filter(i=>i.t.trim()); if (cur.items.length!==before) save(); }
+  if (isEmpty(cur)){ closeNote(); return; }
+  editing = false; paint();
+}
+function closeNote(){
+  if (!cur) return;
+  document.activeElement?.blur();
+  clearTimeout(histTimer);
+  if (cur.type==='check') cur.items = cur.items.filter(i=>i.t.trim());
+  if (isEmpty(cur)) state.notes = state.notes.filter(n=>n!==cur);
+  save(); cur = null; editing = false;
+  $('#noteView').classList.add('hidden');
+  $('#nbody').innerHTML = '';
+  document.querySelector('meta[name=theme-color]').content = '#f2f2f2';
+  renderList();
+}
+
+function pickColor(){
+  const host = overlay(`<div class="backdrop bottom"><div class="sheet"><h4>選擇顏色</h4>
+    <div class="palette">${CKEYS.map(k=>`<button data-c="${k}" class="${cur.color===k?'on':''}" style="background:${col(k).hd}" aria-label="${col(k).name}"></button>`).join('')}</div></div></div>`);
+  host.onclick = e => {
+    if (e.target.classList.contains('backdrop')) return closeOverlay();
+    const c = e.target.dataset.c; if (!c) return;
+    cur.color = c; touch(); setTheme(); closeOverlay();
+  };
+}
+function noteMenu(){
+  const rows = [];
+  if (!editing) rows.push({label:'編輯', fn:()=>{ editing=true; paint(); focusFirst(); }});
+  rows.push({label:'顏色', fn:pickColor});
+  rows.push({label: cur.pinned ? '取消釘選' : '釘選到最上方', fn:()=>{ cur.pinned=!cur.pinned; touch(); toast(cur.pinned?'已釘選':'已取消釘選'); }});
+  rows.push({label: cur.type==='text' ? '轉為清單' : '轉為文字', fn:convert});
+  if (cur.type==='check' && cur.items.some(i=>i.done)){
+    rows.push({label:'全部取消勾選', fn:()=>{ cur.items.forEach(i=>i.done=false); touch(); paintBody(); }});
+    rows.push({label:'刪除已勾選項目', fn:()=>{ cur.items = cur.items.filter(i=>!i.done); touch(); paintBody(); }});
+  }
+  rows.push({label:'分享', fn:()=>{
+    const txt = (cur.title ? cur.title+'\n\n' : '') + plain(cur);
+    if (navigator.share) navigator.share({text:txt}).catch(()=>{});
+    else navigator.clipboard?.writeText(txt).then(()=>toast('已複製'));
+  }});
+  rows.push({label:'複製全文', fn:()=>{
+    navigator.clipboard?.writeText((cur.title ? cur.title+'\n\n' : '') + plain(cur)).then(()=>toast('已複製'), ()=>toast('複製失敗'));
+  }});
+  rows.push({label:'刪除', danger:true, fn:()=>{
+    const n = cur; n.deleted = true; n.pinned = false; touch();
+    if (isEmpty(n)) state.notes = state.notes.filter(x=>x!==n);
+    cur = null; editing = false;
+    $('#noteView').classList.add('hidden'); $('#nbody').innerHTML='';
+    document.querySelector('meta[name=theme-color]').content = '#f2f2f2';
+    save(); renderList();
+    toast('已移到垃圾桶', {label:'復原', fn:()=>{ n.deleted=false; if(!state.notes.includes(n)) state.notes.push(n); save(); renderList(); }});
+  }});
+  sheet(rows);
+}
+function convert(){
+  if (cur.type==='text'){
+    cur.items = cur.body.split('\n').map(s=>s.trim()).filter(Boolean).map(t=>({t,done:false}));
+    cur.type = 'check';
+  } else {
+    cur.body = cur.items.map(i=>i.t).join('\n');
+    cur.type = 'text';
+  }
+  touch(); snapshot(); $('#nbody').innerHTML=''; paintBody();
+  toast(cur.type==='check' ? '已轉為清單' : '已轉為文字');
+}
+
+/* ================= overlays ================= */
+function overlay(html){ const o = $('#overlay'); o.innerHTML = html; return o.firstChild; }
+function closeOverlay(){ $('#overlay').innerHTML = ''; }
+function sheet(rows, title){
+  const el = overlay(`<div class="backdrop bottom"><div class="sheet">${title?`<h4>${esc(title)}</h4>`:''}
+    ${rows.map((r,i)=>`<button class="opt ${r.danger?'danger':''}" data-i="${i}">
+      ${r.dot?`<span class="dot" style="background:${r.dot}"></span>`:''}<span>${esc(r.label)}</span>${r.on?'<span class="on">✓</span>':''}</button>`).join('')}
+  </div></div>`);
+  el.onclick = e => {
+    if (e.target === el) return closeOverlay();
+    const b = e.target.closest('.opt'); if (!b) return;
+    closeOverlay(); rows[+b.dataset.i].fn();
+  };
+}
+function dialog(title, value, onOk){
+  const el = overlay(`<div class="backdrop"><div class="dlg"><h3>${esc(title)}</h3>
+    <textarea id="dlgText">${esc(value)}</textarea>
+    <div class="acts"><button id="dlgNo">取消</button><button id="dlgOk">確定</button></div></div></div>`);
+  const t = $('#dlgText'); setTimeout(()=>{ t.focus(); t.setSelectionRange(t.value.length,t.value.length); }, 50);
+  $('#dlgNo').onclick = closeOverlay;
+  $('#dlgOk').onclick = () => { const v = t.value; closeOverlay(); onOk(v); };
+}
+function confirmDlg(msg, onOk){
+  const el = overlay(`<div class="backdrop"><div class="dlg"><h3 style="font-size:21px;line-height:1.5">${esc(msg)}</h3>
+    <div class="acts"><button id="dlgNo">取消</button><button id="dlgOk" style="color:#d0443a">刪除</button></div></div></div>`);
+  $('#dlgNo').onclick = closeOverlay;
+  $('#dlgOk').onclick = () => { closeOverlay(); onOk(); };
+}
+let toastT;
 function toast(msg, action){
   document.querySelectorAll('.toast').forEach(t=>t.remove());
   const t = document.createElement('div'); t.className = 'toast';
-  t.innerHTML = `<span>${msg}</span>` + (action ? `<button>${action.label}</button>` : '');
+  t.innerHTML = `<span>${esc(msg)}</span>` + (action?`<button>${esc(action.label)}</button>`:'');
   if (action) t.querySelector('button').onclick = () => { action.fn(); t.remove(); };
   document.body.appendChild(t);
-  clearTimeout(toastTimer); toastTimer = setTimeout(()=>t.remove(), 3500);
+  clearTimeout(toastT); toastT = setTimeout(()=>t.remove(), 3500);
 }
 
-/* ---------- editor ---------- */
-function newNote(type){
-  const color = ui.filter !== 'all' ? ui.filter : 'yellow';
-  const n = { id:uid(), type, title:'', body:'', items: type==='check'?[{t:'',done:false}]:[], color,
-    pinned:false, deleted:false, created:Date.now(), updated:Date.now() };
-  state.notes.push(n);
-  openEditor(n, true);
-}
-function openEditor(n, isNew){
-  cur = n;
-  $('#editor').classList.remove('hidden');
-  $('#eTitle').value = n.title;
-  $('#eText').value = n.body;
-  paintEditor();
-  if (isNew){
-    setTimeout(() => (n.type==='text' ? $('#eText') : $('#eList textarea')).focus(), 50);
-  }
-}
-function paintEditor(){
-  const n = cur;
-  $('#editor').style.background = cvar(n.color);
-  document.querySelector('meta[name=theme-color]').content = getComputedStyle(document.documentElement).getPropertyValue('--c-'+n.color).trim();
-  $('#ePin').style.opacity = n.pinned ? 1 : .4;
-  $('#eConvert').textContent = n.type==='text' ? '☑︎' : '¶';
-  $('#eText').classList.toggle('hidden', n.type !== 'text');
-  $('#eList').classList.toggle('hidden', n.type !== 'check');
-  if (n.type === 'check') renderItems();
-  else autosizeText();
-  $('#eTime').textContent = `建立 ${new Date(n.created).toLocaleString('zh-TW')}　·　修改 ${new Date(n.updated).toLocaleString('zh-TW')}`;
-}
-function autosizeText(){
-  const t = $('#eText'); t.style.height = 'auto'; t.style.height = Math.max(t.scrollHeight, window.innerHeight*0.6) + 'px';
-}
-function itemHTML(it, idx){
-  return `<div class="item ${it.done?'done':''}" data-i="${idx}">
-    <button class="box" aria-label="勾選"></button>
-    <textarea rows="1" enterkeyhint="next">${esc(it.t)}</textarea>
-    <button class="x" aria-label="刪除項目">✕</button></div>`;
-}
-function renderItems(focusIdx, caret){
-  const n = cur;
-  const open = n.items.map((it,i)=>[it,i]).filter(([it])=>!it.done);
-  const done = n.items.map((it,i)=>[it,i]).filter(([it])=>it.done);
-  let h = open.map(([it,i])=>itemHTML(it,i)).join('');
-  h += `<button class="additem" id="addItem">＋ 新增項目</button>`;
-  if (done.length) h += `<div class="donehdr">已完成 ${done.length} 項</div>` + done.map(([it,i])=>itemHTML(it,i)).join('');
-  $('#eList').innerHTML = h;
-  $('#eList').querySelectorAll('textarea').forEach(sizeTA);
-  if (focusIdx != null){
-    const ta = $(`#eList .item[data-i="${focusIdx}"] textarea`);
-    if (ta){ ta.focus(); const p = caret ?? ta.value.length; ta.setSelectionRange(p,p); }
-  }
-}
-function sizeTA(t){ t.style.height='auto'; t.style.height = t.scrollHeight + 'px'; }
-function touch(){ cur.updated = Date.now(); save(); }
-
-function closeEditor(){
-  if (!cur) return;
-  document.activeElement && document.activeElement.blur();
-  if (cur.type==='check') cur.items = cur.items.filter((it,i,arr)=> it.t.trim() || arr.length===1);
-  if (isEmpty(cur)){
-    state.notes = state.notes.filter(n => n !== cur);
-  }
-  save();
-  cur = null;
-  $('#editor').classList.add('hidden');
-  document.querySelector('meta[name=theme-color]').content = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-  render();
-}
-
-/* editor events */
-$('#eBack').onclick = closeEditor;
-$('#eTitle').addEventListener('input', e => { cur.title = e.target.value; touch(); });
-$('#eTitle').addEventListener('keydown', e => {
-  if (e.key === 'Enter'){ e.preventDefault();
-    if (cur.type==='text') $('#eText').focus();
-    else { const t = $('#eList textarea'); t ? t.focus() : addItemAt(0); }
-  }
-});
-$('#eText').addEventListener('input', e => { cur.body = e.target.value; autosizeText(); touch(); });
-
-function addItemAt(pos, text=''){
-  cur.items.splice(pos, 0, {t:text, done:false}); touch(); renderItems(pos, 0);
-}
-$('#eList').addEventListener('input', e => {
-  const row = e.target.closest('.item'); if (!row) return;
-  cur.items[+row.dataset.i].t = e.target.value; sizeTA(e.target); touch();
-});
-$('#eList').addEventListener('keydown', e => {
-  const row = e.target.closest('.item'); if (!row || e.target.tagName!=='TEXTAREA') return;
-  const i = +row.dataset.i, ta = e.target;
-  if (e.key === 'Enter' && !e.isComposing){
-    e.preventDefault();
-    const pos = ta.selectionStart, before = ta.value.slice(0,pos), after = ta.value.slice(pos);
-    cur.items[i].t = before;
-    if (!before.trim() && !after.trim()){ ta.blur(); return; } // enter on empty line = done
-    addItemAt(i+1, after);
-  } else if (e.key === 'Backspace' && ta.selectionStart === 0 && ta.selectionEnd === 0){
-    // merge with previous open item
-    const openIdx = cur.items.map((it,k)=>k).filter(k=>!cur.items[k].done);
-    const p = openIdx.indexOf(i);
-    if (p > 0){
-      e.preventDefault();
-      const prev = openIdx[p-1], caret = cur.items[prev].t.length;
-      cur.items[prev].t += ta.value; cur.items.splice(i,1); touch();
-      renderItems(prev > i ? prev-1 : prev, caret);
-    }
-  }
-});
-$('#eList').addEventListener('click', e => {
-  if (e.target.id === 'addItem'){
-    const lastOpen = cur.items.reduce((m,it,k)=> it.done?m:k, -1);
-    return addItemAt(lastOpen+1);
-  }
-  const row = e.target.closest('.item'); if (!row) return;
-  const i = +row.dataset.i;
-  if (e.target.classList.contains('box')){
-    cur.items[i].done = !cur.items[i].done; touch(); renderItems();
-  } else if (e.target.classList.contains('x')){
-    const removed = cur.items.splice(i,1)[0]; touch(); renderItems();
-    toast('已刪除項目', {label:'復原', fn:()=>{ cur && (cur.items.splice(i,0,removed), touch(), renderItems()); }});
-  }
-});
-
-$('#ePin').onclick = () => { cur.pinned = !cur.pinned; touch(); paintEditor(); toast(cur.pinned?'已釘選':'已取消釘選'); };
-$('#eColor').onclick = () => {
-  const s = sheet([], `<div class="palette">${COLORS.map(c=>`<button data-c="${c}" class="${cur.color===c?'on':''}" style="background:${cvar(c)}" aria-label="${COLOR_NAMES[c]}"></button>`).join('')}</div>`);
-  s.el.querySelector('.palette').onclick = e => {
-    const c = e.target.dataset.c; if (!c) return;
-    cur.color = c; touch(); paintEditor(); s.close();
-  };
-};
-$('#eConvert').onclick = () => {
-  if (cur.type === 'text'){
-    const lines = cur.body.split('\n').map(s=>s.trim()).filter(Boolean);
-    cur.items = (lines.length?lines:['']).map(t=>({t, done:false}));
-    cur.type = 'check';
-    toast('已轉為清單');
-  } else {
-    cur.body = cur.items.filter(i=>i.t.trim()).map(i=>i.t).join('\n');
-    $('#eText').value = cur.body;
-    cur.type = 'text';
-    toast('已轉為文字');
-  }
-  touch(); paintEditor();
-};
-$('#eMore').onclick = () => {
-  const rows = [
-    {icon:'📋', label:'複製全文', fn:()=>copyNote(cur)},
-    {icon:'📤', label:'分享', fn:()=>shareNote(cur)},
-  ];
-  if (cur.type==='check'){
-    rows.push({icon:'☐', label:'全部取消勾選', fn:()=>{cur.items.forEach(i=>i.done=false);touch();renderItems();}});
-    rows.push({icon:'🧹', label:'清除已完成項目', fn:()=>{cur.items=cur.items.filter(i=>!i.done); if(!cur.items.length)cur.items=[{t:'',done:false}]; touch();renderItems();}});
-  }
-  rows.push({icon:'🗑', label:'移到垃圾桶', danger:true, fn:()=>{
-    const n = cur; n.deleted = true; n.pinned = false; touch(); closeEditor();
-    toast('已移到垃圾桶', {label:'復原', fn:()=>{ n.deleted=false; save(); render(); }});
-  }});
-  sheet(rows);
-};
-function copyNote(n){
-  const txt = (n.title ? n.title + '\n\n' : '') + plain(n);
-  navigator.clipboard?.writeText(txt).then(()=>toast('已複製'), ()=>toast('複製失敗'));
-}
-function shareNote(n){
-  const txt = (n.title ? n.title + '\n\n' : '') + plain(n);
-  if (navigator.share) navigator.share({ text: txt }).catch(()=>{});
-  else copyNote(n);
-}
-
-/* ---------- list events ---------- */
-$('#chips').onclick = e => { const c = e.target.dataset.c; if (!c) return; ui.filter = c; render(); };
-$('#q').addEventListener('input', e => { ui.q = e.target.value; renderList(); });
-$('#list').onclick = e => {
-  const card = e.target.closest('.card'); if (!card) return;
-  const n = state.notes.find(x => x.id === card.dataset.id);
-  if (ui.view === 'trash'){
-    sheet([
-      {icon:'↩︎', label:'還原', fn:()=>{ n.deleted=false; save(); render(); toast('已還原'); }},
-      {icon:'✕', label:'永久刪除', danger:true, fn:()=>{ state.notes = state.notes.filter(x=>x!==n); save(); render(); }},
-    ]);
-  } else openEditor(n);
-};
-$('#fab').onclick = () => sheet([
-  {icon:'📝', label:'文字筆記', fn:()=>newNote('text')},
-  {icon:'☑️', label:'清單', fn:()=>newNote('check')},
-]);
-$('#sortBtn').onclick = () => sheet(Object.entries(SORTS).map(([k,v])=>({
-  icon: ui.sort===k ? '●' : '○', label:v, fn:()=>{ ui.sort=k; save(); renderList(); }
-})));
-$('#menuBtn').onclick = () => {
-  const trashCount = state.notes.filter(n=>n.deleted).length;
-  const rows = ui.view==='trash'
-    ? [{icon:'‹', label:'回到記事本', fn:()=>{ui.view='notes';render();}},
-       {icon:'✕', label:`清空垃圾桶（${trashCount}）`, danger:true, fn:()=>{
-         if (confirm('永久刪除垃圾桶裡的所有筆記？')){ state.notes = state.notes.filter(n=>!n.deleted); save(); render(); } }}]
-    : [{icon:'🗑', label:`垃圾桶（${trashCount}）`, fn:()=>{ui.view='trash';render();}},
-       {icon:'⬇︎', label:'匯出備份', fn:exportData},
-       {icon:'⬆︎', label:'匯入備份', fn:()=>$('#importFile').click()}];
-  sheet(rows);
-};
-
-/* ---------- backup ---------- */
+/* ================= backup ================= */
 function exportData(){
   const data = JSON.stringify({app:'colornotes', version:1, exported:Date.now(), notes:state.notes}, null, 1);
-  const d = new Date(), name = `記事本備份-${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}.json`;
+  const d = new Date(), name = `記事本備份-${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}.json`;
   const file = new File([data], name, {type:'application/json'});
-  if (navigator.canShare && navigator.canShare({files:[file]})){
-    navigator.share({files:[file]}).catch(()=>{});
-  } else {
-    const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = name; a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
-  }
+  if (navigator.canShare && navigator.canShare({files:[file]})) navigator.share({files:[file]}).catch(()=>{});
+  else { const a=document.createElement('a'); a.href=URL.createObjectURL(file); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
 }
 $('#importFile').onchange = async e => {
-  const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+  const f = e.target.files[0]; e.target.value=''; if (!f) return;
   try {
-    const data = JSON.parse(await f.text());
-    if (!Array.isArray(data.notes)) throw 0;
-    const have = new Map(state.notes.map(n=>[n.id,n]));
-    let added = 0, updated = 0;
+    const data = JSON.parse(await f.text()); if (!Array.isArray(data.notes)) throw 0;
+    const have = new Map(state.notes.map(n=>[n.id,n])); let a=0,u=0;
     for (const n of data.notes){
+      if (!COLORS[n.color]) n.color='yellow';
       const h = have.get(n.id);
-      if (!h){ state.notes.push(n); added++; }
-      else if (n.updated > h.updated){ Object.assign(h, n); updated++; }
+      if (!h){ state.notes.push(n); a++; } else if (n.updated > h.updated){ Object.assign(h,n); u++; }
     }
-    save(); render(); toast(`匯入完成：新增 ${added}、更新 ${updated}`);
+    save(); renderList(); toast(`匯入完成：新增 ${a}、更新 ${u}`);
   } catch { toast('這個檔案不是記事本備份'); }
 };
 
-/* save when app goes to background */
-document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else if (cur && !editing) paintMeta(); else if (!cur) renderList(); });
 window.addEventListener('pagehide', save);
+window.addEventListener('resize', sizeText);
 
-render();
+renderList();
 })();
 </script>
 </body>
