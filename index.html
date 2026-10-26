@@ -92,15 +92,8 @@ svg{display:block}
 .ci .grip{flex:none;width:36px;height:52px;display:grid;place-items:center;color:rgba(0,0,0,.22);touch-action:none;font-size:18px;letter-spacing:-2px}
 .ci.focus .grip{display:none}
 .ci.dragging{z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.2)}
-.newidea{position:sticky;top:0;z-index:4;display:flex;align-items:flex-start;gap:4px;padding:8px 10px 8px 8px;
-  background:var(--bg);border-bottom:2px solid var(--hd)}
-.newidea .plus{flex:none;width:30px;height:46px;display:grid;place-items:center;font-size:24px;color:rgba(0,0,0,.4)}
-.newidea textarea{flex:1;min-width:0;border:0;resize:none;font-size:20px;line-height:1.5;padding:9px 12px;height:46px;
-  overflow:hidden;display:block;background:rgba(255,255,255,.6);border-radius:10px}
-.newidea textarea:focus{background:#fff}
-.newidea textarea::placeholder{color:rgba(0,0,0,.35)}
-.newidea .add{flex:none;height:46px;padding:0 14px;border-radius:10px;background:rgba(0,0,0,.72);color:#fff;font-size:16px;display:none}
-.newidea.typing .add{display:block}
+.addrow{display:flex;align-items:center;gap:6px;width:100%;padding:0 0 0 14px;height:54px;font-size:19px;color:rgba(0,0,0,.45);text-align:left;border-bottom:1px solid var(--rule)}
+.addrow span:first-child{font-size:22px}
 .hint{font-size:13px;color:rgba(0,0,0,.4);text-align:center;padding:14px}
 
 /* keyboard toolbar */
@@ -399,26 +392,7 @@ function paintBody(){
     sizeText();
     return;
   }
-  b.innerHTML = `<div class="newidea" id="newWrap"><span class="plus">＋</span>
-      <textarea id="newIdea" rows="1" enterkeyhint="send" placeholder="新想法…"></textarea>
-      <button class="add" id="newAdd">加入</button></div><div class="cl" id="cl"></div>`;
-  const t = $('#newIdea');
-  t.addEventListener('input', () => { sizeTA(t, 46); $('#newWrap').classList.toggle('typing', !!t.value.trim()); });
-  t.addEventListener('keydown', e => {
-    if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
-    e.preventDefault();
-    if (!t.value.trim()){ t.blur(); return; }
-    commitNew();
-  });
-  t.addEventListener('paste', e => {
-    const txt = (e.clipboardData || window.clipboardData)?.getData('text') || '';
-    if (!txt.includes('\n')) return;
-    e.preventDefault();
-    const lines = splitLines((t.value ? t.value + '\n' : '') + txt);
-    addTop(lines); t.value = ''; sizeTA(t, 46); $('#newWrap').classList.remove('typing');
-  });
-  $('#newAdd').addEventListener('pointerdown', e => e.preventDefault());
-  $('#newAdd').onclick = commitNew;
+  b.innerHTML = `<button class="addrow" id="addItem"><span>＋</span><span>新增一行</span></button><div class="cl" id="cl"></div>`;
   renderChecklist();
 }
 const splitLines = txt => txt.split(/\r?\n/).map(s=>s.replace(/^\s*([-*•□☐✓☑]|\d+[.)、])\s*/,'').trim()).filter(Boolean);
@@ -429,14 +403,13 @@ function addTop(lines){
   changed(true); renderChecklist();
   $('#nbody').scrollTop = 0;
 }
-function commitNew(){
-  const t = $('#newIdea'); const v = t.value.trim();
-  if (!v) return;
-  addTop([v]);
-  t.value = ''; sizeTA(t, 46); $('#newWrap').classList.remove('typing');
-  t.focus();
+function focusNew(){
+  const first = cur.items[0];
+  if (first && !first.t.trim()){ focusItem(first.id); return; }
+  const n = {id:uid(), t:'', done:false};
+  cur.items.unshift(n); changed(); renderChecklist();
+  $('#nbody').scrollTop = 0; focusItem(n.id, 0);
 }
-function focusNew(){ const t = $('#newIdea'); if (t){ t.focus(); $('#nbody').scrollTop = 0; } }
 function sizeText(){
   const t = $('#eText'); if (!t) return;
   t.style.height = 'auto';
@@ -493,6 +466,7 @@ function removeItem(id){
 
 $('#nbody').addEventListener('click', e => {
   if (!cur || cur.type!=='check') return;
+  if (e.target.closest('#addItem')) return focusNew();
   const row = e.target.closest('.ci');
   if (row && e.target.closest('.x')){
     const id = row.dataset.id, idx = findItem(id);
