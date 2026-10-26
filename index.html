@@ -6,14 +6,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="記事本">
-<meta name="theme-color" content="#f2f2f2">
+<meta name="apple-mobile-web-app-title" content="茄記">
+<meta name="theme-color" content="#F7F1E8">
 <link rel="apple-touch-icon" href="icon.png">
-<title>記事本</title>
+<title>茄記</title>
 <style>
 :root{
-  --app:#f2f2f2; --bar:#ececec; --line:#d6d6d6; --text:#1f1f1f; --muted:#6b6b6b;
-  --teal:#11998b;
+  --app:#F7F1E8; --bar:#F0E6D8; --line:#E0D3C1; --text:#2A2230; --muted:#7A6E7F;
+  --egg:#5B3A72; --stem:#6E8B3D; --card:#FFFDF9;
   --safe-t:env(safe-area-inset-top); --safe-b:env(safe-area-inset-bottom);
 }
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -32,30 +32,32 @@ svg{display:block}
 #listView{min-height:100%;display:flex;flex-direction:column}
 .lhead{position:sticky;top:0;z-index:5;background:var(--bar);border-bottom:1px solid var(--line)}
 .lbar{display:flex;align-items:center;gap:4px;padding:calc(var(--safe-t) + 6px) 6px 6px 16px;min-height:56px}
-.lbar h1{flex:1;margin:0;font-size:26px;font-weight:500;color:#555;letter-spacing:.5px}
-.lbar input{flex:1;min-width:0;font-size:18px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.lbar h1{flex:1;margin:0;font-size:26px;font-weight:600;color:var(--egg);letter-spacing:1px}
+.lbar input{flex:1;min-width:0;font-size:18px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px 10px}
 .colorgrid{width:26px;height:26px;display:grid;grid-template-columns:1fr 1fr;gap:2px}
 .colorgrid i{display:block}
-.sortbar{display:block;width:calc(100% - 16px);margin:0 8px 8px;background:#fafafa;border:1px solid var(--line);
-  padding:9px;text-align:center;font-size:18px}
+.sortbar{display:block;width:calc(100% - 16px);margin:0 8px 8px;background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:9px;color:var(--muted);text-align:center;font-size:18px}
 .filtertag{font-size:14px;color:var(--muted);text-align:center;margin:-2px 0 8px}
 #list{flex:1;padding:6px 8px calc(var(--safe-b) + 150px)}
-.row{display:flex;align-items:center;width:100%;min-height:68px;margin-bottom:6px;text-align:left;
-  border-left:5px solid;padding:10px 12px 10px 14px;gap:10px;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.row{display:flex;align-items:center;width:100%;min-height:68px;margin-bottom:8px;text-align:left;border-radius:12px;
+  border-left:6px solid;padding:10px 12px 10px 14px;gap:10px;box-shadow:0 1px 2px rgba(60,40,30,.10)}
 .row:active{filter:brightness(.95)}
 .row .rt{flex:1;font-size:21px;line-height:1.3;word-break:break-word;
   display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .row .rd{flex:none;display:flex;align-items:center;gap:6px;font-size:16px;color:#555;text-align:right}
 .row .rd svg{width:20px;height:20px;flex:none}
 .row .prog{font-size:13px;color:#777}
-.empty{text-align:center;color:var(--muted);padding:70px 20px;line-height:1.8}
-.fab{position:fixed;right:18px;bottom:calc(var(--safe-b) + 78px);width:62px;height:62px;border-radius:18px;
-  background:var(--teal);color:#fff;display:grid;place-items:center;box-shadow:0 4px 12px rgba(0,0,0,.25);z-index:6}
-.fab svg{width:30px;height:30px}
+.empty{text-align:center;color:var(--muted);padding:56px 20px;line-height:1.8}
+.empty svg{width:150px;height:auto;margin:0 auto 10px}
+.fab{position:fixed;right:16px;bottom:calc(var(--safe-b) + 74px);width:66px;height:78px;
+  display:grid;place-items:center;z-index:6;filter:drop-shadow(0 4px 8px rgba(60,30,80,.30))}
+.fab svg{width:66px;height:78px}
+.fab:active{transform:scale(.93)}
 .bnav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--bar);border-top:1px solid var(--line);
   display:flex;padding-bottom:var(--safe-b)}
-.bnav button{flex:1;height:60px;display:grid;place-items:center;color:#666}
-.bnav button.on{color:var(--teal)}
+.bnav button{flex:1;height:60px;display:grid;place-items:center;color:#9A8F9E}
+.bnav button.on{color:var(--egg)}
 .bnav svg{width:28px;height:28px}
 
 /* ================= NOTE ================= */
@@ -108,23 +110,23 @@ svg{display:block}
 /* ================= DIALOG / SHEET ================= */
 .backdrop{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:30;display:flex;align-items:center;justify-content:center;padding:20px}
 .backdrop.bottom{align-items:flex-end;padding:0}
-.dlg{background:#efefef;border-radius:26px;width:100%;max-width:420px;padding:26px 24px 14px}
+.dlg{background:var(--card);border-radius:26px;width:100%;max-width:420px;padding:26px 24px 14px}
 .dlg h3{margin:0 0 18px;font-size:21px;line-height:1.5;font-weight:500}
 .dlg .acts{display:flex;justify-content:flex-end;gap:30px;margin-top:16px}
-.dlg .acts button{color:var(--teal);font-size:19px;padding:10px 6px}
-.sheet{background:#fff;width:100%;border-radius:16px 16px 0 0;padding:8px 0 calc(var(--safe-b) + 8px);max-height:80vh;overflow:auto}
+.dlg .acts button{color:var(--egg);font-size:19px;padding:10px 6px}
+.sheet{background:var(--card);width:100%;border-radius:16px 16px 0 0;padding:8px 0 calc(var(--safe-b) + 8px);max-height:80vh;overflow:auto}
 .sheet h4{margin:8px 20px 6px;font-size:15px;color:var(--muted);font-weight:500}
 .sheet .opt{display:flex;align-items:center;gap:14px;width:100%;padding:15px 20px;text-align:left;font-size:18px}
-.sheet .opt:active{background:#f0f0f0}
+.sheet .opt:active{background:#F3ECE2}
 .sheet .opt.danger{color:#d0443a}
 .sheet .opt .dot{width:24px;height:24px;border-radius:5px;border:1px solid rgba(0,0,0,.2);flex:none}
-.sheet .opt .on{margin-left:auto;color:var(--teal);font-weight:700}
+.sheet .opt .on{margin-left:auto;color:var(--egg);font-weight:700}
 .palette{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;padding:10px 20px 18px}
 .palette button{aspect-ratio:1;border-radius:10px;border:1px solid rgba(0,0,0,.2)}
-.palette button.on{outline:3px solid var(--teal);outline-offset:2px}
+.palette button.on{outline:3px solid var(--egg);outline-offset:2px}
 .toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 150px);transform:translateX(-50%);z-index:50;
-  background:#333;color:#fff;padding:11px 18px;border-radius:22px;font-size:15px;display:flex;gap:16px;align-items:center;white-space:nowrap}
-.toast button{color:#7fe0d4;font-weight:700}
+  background:#3A2E42;color:#fff;padding:11px 18px;border-radius:22px;font-size:15px;display:flex;gap:16px;align-items:center;white-space:nowrap}
+.toast button{color:#CDB4E6;font-weight:700}
 </style>
 </head>
 <body>
@@ -133,7 +135,7 @@ svg{display:block}
 <div id="listView">
   <div class="lhead">
     <div class="lbar">
-      <h1 id="lTitle">記事本</h1>
+      <h1 id="lTitle">茄記</h1>
       <input id="q" type="search" class="hidden" placeholder="搜尋筆記" autocomplete="off">
       <button class="ib" id="filterBtn" aria-label="依顏色篩選"><span class="colorgrid" id="cgrid"></span></button>
       <button class="ib" id="lMore" aria-label="選單"></button>
@@ -188,17 +190,39 @@ const I = {
   redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0-6 6v1"/></svg>',
 };
 
+/* ---------------- eggplant art ---------------- */
+let eggN = 0;
+function egg(mood){
+  const g = 'eg' + (eggN++);
+  const eyes = {
+    calm:  '<circle cx="50" cy="92" r="4.6" fill="#2A2230"/><circle cx="74" cy="92" r="4.6" fill="#2A2230"/>',
+    happy: '<path d="M45 93q5-6 10 0M69 93q5-6 10 0" stroke="#2A2230" stroke-width="3.4" fill="none" stroke-linecap="round"/>',
+    sleep: '<path d="M45 92q5 4 10 0M69 92q5 4 10 0" stroke="#2A2230" stroke-width="3.2" fill="none" stroke-linecap="round"/>',
+  }[mood] || '';
+  return `<defs>
+   <radialGradient id="${g}b" cx="38%" cy="35%" r="75%"><stop offset="0" stop-color="#9C78BE"/><stop offset=".55" stop-color="#6E4A8C"/><stop offset="1" stop-color="#4E3266"/></radialGradient>
+   <radialGradient id="${g}c" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#9DBB6E"/><stop offset="1" stop-color="#5E7A33"/></radialGradient></defs>
+  <path d="M62 34C88 34 104 64 104 94C104 120 86 136 62 136C38 136 20 120 20 95C20 68 36 46 48 38C52 35 57 34 62 34Z" fill="url(#${g}b)"/>
+  <ellipse cx="44" cy="62" rx="9" ry="14" fill="#fff" opacity=".22" transform="rotate(25 44 62)"/>
+  <path d="M58 8q4-2 8 0l-1 22h-6z" fill="#5E7A33"/>
+  <path d="M62 24C50 24 37 31 33 46C42 40 49 41 53 47C56 40 68 40 71 47C75 41 82 40 91 46C87 31 74 24 62 24Z" fill="url(#${g}c)"/>
+  ${eyes}${mood ? '<ellipse cx="41" cy="103" rx="6.5" ry="4" fill="#F4A7B9" opacity=".75"/><ellipse cx="83" cy="103" rx="6.5" ry="4" fill="#F4A7B9" opacity=".75"/>' : ''}`;
+}
+const basket = '<g transform="translate(120 96)"><path d="M0 8h64l-9 38H9z" fill="#C99A63"/><path d="M4 22h56M7 34h50" stroke="#A97A46" stroke-width="3"/><path d="M14 8V46M32 8V46M50 8V46" stroke="#A97A46" stroke-width="2.5" opacity=".7"/><rect x="-3" y="2" width="70" height="9" rx="4.5" fill="#B58550"/><path d="M14 4C14-16 50-16 50 4" stroke="#B58550" stroke-width="5" fill="none"/></g>';
+const emptyArt = mood => `<svg viewBox="0 0 196 146" xmlns="http://www.w3.org/2000/svg"><ellipse cx="98" cy="139" rx="86" ry="6" fill="#000" opacity=".07"/>${mood==='sleep' ? '<g transform="translate(36 0)">'+egg(mood)+'</g>' : egg(mood)+basket}</svg>`;
+const fabArt = () => `<svg viewBox="14 0 96 140" xmlns="http://www.w3.org/2000/svg">${egg('')}<path d="M62 70v40M42 90h40" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg>`;
+
 /* ---------------- colors ---------------- */
 const COLORS = {
-  yellow:{bg:'#fdf7bf', hd:'#f5da6b', rule:'#f1e27c', name:'黃'},
-  orange:{bg:'#fde3c7', hd:'#f6b26f', rule:'#f3c793', name:'橘'},
-  red:   {bg:'#fbd5d1', hd:'#ec8a80', rule:'#f0aca5', name:'紅'},
-  purple:{bg:'#e6dcf4', hd:'#ad95da', rule:'#cdbbe8', name:'紫'},
-  blue:  {bg:'#d6e8f9', hd:'#83b5e7', rule:'#aecdee', name:'藍'},
-  green: {bg:'#d9f1d1', hd:'#93d083', rule:'#b4e0a8', name:'綠'},
-  gray:  {bg:'#e9e9e9', hd:'#b9b9b9', rule:'#d0d0d0', name:'灰'},
-  black: {bg:'#d4d4d4', hd:'#5a5a5a', rule:'#bdbdbd', name:'黑'},
-  white: {bg:'#ffffff', hd:'#e2e2e2', rule:'#ececec', name:'白'},
+  purple:{bg:'#EDE4F3', hd:'#8E6AAE', rule:'#D6C6E6', name:'茄子'},
+  yellow:{bg:'#FBF2C9', hd:'#EECF5E', rule:'#EEDF9A', name:'玉米'},
+  orange:{bg:'#FCE2CB', hd:'#F09C5E', rule:'#F2C49E', name:'紅蘿蔔'},
+  red:   {bg:'#F9D7D2', hd:'#E07A6F', rule:'#EDADA5', name:'甜椒'},
+  blue:  {bg:'#DCE5F4', hd:'#7F99D0', rule:'#B7C7E7', name:'藍莓'},
+  green: {bg:'#E0ECD2', hd:'#8DAF62', rule:'#C3D8A9', name:'青蔥'},
+  gray:  {bg:'#EEE7DE', hd:'#B6A895', rule:'#DACFC1', name:'香菇'},
+  black: {bg:'#DAD5DB', hd:'#4A3F4E', rule:'#C4BDC6', name:'黑豆'},
+  white: {bg:'#FFFDF9', hd:'#E8E0D3', rule:'#EFE8DC', name:'白蘿蔔'},
 };
 const CKEYS = Object.keys(COLORS);
 const col = c => COLORS[c] || COLORS.yellow;
@@ -258,7 +282,7 @@ const label = n => n.title.trim() || (n.type==='text' ? n.body : n.items.map(i=>
 const isEmpty = n => !n.title.trim() && (n.type==='text' ? !n.body.trim() : n.items.every(i=>!i.t.trim()));
 
 /* ---------------- static icons ---------------- */
-$('#lMore').innerHTML = I.dots; $('#fab').innerHTML = I.plus;
+$('#lMore').innerHTML = I.dots; $('#fab').innerHTML = fabArt();
 $('#navNotes').innerHTML = I.notes; $('#navSearch').innerHTML = I.search;
 $('#navTrash').innerHTML = I.trash; $('#navMenu').innerHTML = I.menu;
 $('#hBack').innerHTML = I.back; $('#hMore').innerHTML = I.dots;
@@ -267,7 +291,7 @@ $('#undoBtn').innerHTML = I.undo; $('#redoBtn').innerHTML = I.redo;
 /* ================= LIST ================= */
 function renderList(){
   const trash = ui.view === 'trash';
-  $('#lTitle').textContent = trash ? '垃圾桶' : '記事本';
+  $('#lTitle').textContent = trash ? '垃圾桶' : '茄記';
   $('#lTitle').classList.toggle('hidden', ui.searching);
   $('#q').classList.toggle('hidden', !ui.searching);
   $('#fab').classList.toggle('hidden', trash);
@@ -276,11 +300,11 @@ function renderList(){
   $('#navSearch').classList.toggle('on', ui.searching);
   $('#navTrash').classList.toggle('on', trash);
   $('#cgrid').innerHTML = ui.filter === 'all'
-    ? ['#5ab4dc','#e5dc2c','#9a9ac8','#ef6a3c'].map(c=>`<i style="background:${c}"></i>`).join('')
+    ? ['#8E6AAE','#EECF5E','#8DAF62','#F09C5E'].map(c=>`<i style="background:${c}"></i>`).join('')
     : `<i style="background:${col(ui.filter).hd};grid-column:1/3;grid-row:1/3;border-radius:3px"></i>`;
   const ft = $('#filterTag');
   ft.classList.toggle('hidden', ui.filter==='all');
-  ft.textContent = ui.filter==='all' ? '' : `只顯示${col(ui.filter).name}色　·　點右上色塊切換`;
+  ft.textContent = ui.filter==='all' ? '' : `只顯示${col(ui.filter).name}　·　點右上色塊切換`;
 
   const q = ui.q.trim().toLowerCase();
   let notes = state.notes.filter(n => trash ? n.deleted : !n.deleted)
@@ -297,7 +321,11 @@ function renderList(){
   });
   const el = $('#list');
   if (!notes.length){
-    el.innerHTML = `<div class="empty">${trash ? '垃圾桶是空的' : (q||ui.filter!=='all' ? '找不到符合的筆記' : '還沒有筆記<br>點右下角 ＋ 開始寫')}</div>`;
+    el.innerHTML = trash
+      ? `<div class="empty">${emptyArt('sleep')}垃圾桶是空的<br>茄子在睡覺</div>`
+      : (q||ui.filter!=='all')
+        ? `<div class="empty">${emptyArt('calm')}找不到符合的筆記</div>`
+        : `<div class="empty">${emptyArt('happy')}菜籃還是空的<br>點右下角的茄子，寫下第一個想法</div>`;
     return;
   }
   el.innerHTML = notes.map(n => {
@@ -327,8 +355,8 @@ $('#sortBtn').onclick = () => sheet(Object.entries(SORTS).map(([k,v])=>({
   label:v, on: ui.sort===k, fn:()=>{ ui.sort=k; save(); renderList(); }
 })), '排序方式');
 $('#filterBtn').onclick = () => sheet([
-  {label:'全部顏色', on: ui.filter==='all', fn:()=>{ ui.filter='all'; renderList(); }},
-  ...CKEYS.map(k=>({ label:col(k).name+'色', dot:col(k).hd, on:ui.filter===k, fn:()=>{ ui.filter=k; renderList(); } }))
+  {label:'全部', on: ui.filter==='all', fn:()=>{ ui.filter='all'; renderList(); }},
+  ...CKEYS.map(k=>({ label:col(k).name, dot:col(k).hd, on:ui.filter===k, fn:()=>{ ui.filter=k; renderList(); } }))
 ], '依顏色篩選');
 $('#q').addEventListener('input', e => { ui.q = e.target.value; renderList(); });
 $('#navNotes').onclick = () => { ui.view='notes'; ui.searching=false; ui.q=''; $('#q').value=''; renderList(); scrollTo(0,0); };
@@ -342,7 +370,7 @@ $('#navMenu').onclick = $('#lMore').onclick = () => {
   if (ui.view === 'trash'){
     const cnt = state.notes.filter(n=>n.deleted).length;
     return sheet([
-      {label:'回到記事本', fn:()=>{ ui.view='notes'; renderList(); }},
+      {label:'回到茄記', fn:()=>{ ui.view='notes'; renderList(); }},
       {label:`清空垃圾桶（${cnt}）`, danger:true, fn:()=> confirmDlg('永久刪除垃圾桶裡的所有筆記？', ()=>{
         state.notes = state.notes.filter(n=>!n.deleted); save(); renderList(); }) },
     ]);
@@ -357,7 +385,7 @@ $('#navMenu').onclick = $('#lMore').onclick = () => {
 /* ================= NOTE ================= */
 function newNote(type){
   const n = { id:uid(), type, title:'', body:'', items: [],
-    color: ui.filter!=='all' ? ui.filter : 'yellow', pinned:false, deleted:false,
+    color: ui.filter!=='all' ? ui.filter : 'purple', pinned:false, deleted:false,
     created:Date.now(), updated:Date.now() };
   state.notes.push(n);
   openNote(n);
@@ -674,7 +702,7 @@ function closeNote(){
   save(); cur = null;
   $('#noteView').classList.add('hidden'); $('#kbar').classList.add('hidden');
   $('#nbody').innerHTML = '';
-  document.querySelector('meta[name=theme-color]').content = '#f2f2f2';
+  document.querySelector('meta[name=theme-color]').content = '#F7F1E8';
   renderList();
 }
 $('#hBack').onclick = closeNote;
@@ -714,7 +742,7 @@ $('#hMore').onclick = () => {
     if (empty) state.notes = state.notes.filter(x=>x!==n);
     cur = null; save();
     $('#noteView').classList.add('hidden'); $('#kbar').classList.add('hidden'); $('#nbody').innerHTML='';
-    document.querySelector('meta[name=theme-color]').content = '#f2f2f2';
+    document.querySelector('meta[name=theme-color]').content = '#F7F1E8';
     renderList();
     if (!empty) toast('已移到垃圾桶', {label:'復原', fn:()=>{ n.deleted=false; save(); renderList(); }});
   }});
@@ -765,7 +793,7 @@ function toast(msg, action){
 /* ================= backup ================= */
 function exportData(){
   const data = JSON.stringify({app:'colornotes', version:1, exported:Date.now(), notes:state.notes}, null, 1);
-  const d = new Date(), name = `記事本備份-${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}.json`;
+  const d = new Date(), name = `茄記備份-${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}.json`;
   const file = new File([data], name, {type:'application/json'});
   if (navigator.canShare && navigator.canShare({files:[file]})) navigator.share({files:[file]}).catch(()=>{});
   else { const a=document.createElement('a'); a.href=URL.createObjectURL(file); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000); }
@@ -780,7 +808,7 @@ $('#importFile').onchange = async e => {
       if (!h){ state.notes.push(n); a++; } else if (n.updated > h.updated){ Object.assign(h,n); u++; }
     }
     save(); renderList(); toast(`匯入完成：新增 ${a}、更新 ${u}`);
-  } catch { toast('這個檔案不是記事本備份'); }
+  } catch { toast('這個檔案不是茄記備份'); }
 };
 
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(); else if (cur) paintMeta(); else renderList(); });
