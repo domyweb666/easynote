@@ -82,21 +82,25 @@ svg{display:block}
 .ci.sw-r .under{background:#7a7a7a}
 .ci.sw-l .under{background:#d0443a}
 .ci.sw-r .under .r, .ci.sw-l .under .l{visibility:hidden}
-.ci .cin{position:relative;display:flex;align-items:flex-start;gap:2px;padding:0 0 0 12px;background:var(--bg);will-change:transform}
+.ci .cin{position:relative;display:flex;align-items:flex-start;gap:2px;padding:0 0 0 14px;background:var(--bg);will-change:transform}
 .ci.focus .cin{background:color-mix(in srgb, var(--bg) 55%, #fff)}
-.ci .bul{flex:none;width:18px;height:54px;display:grid;place-items:center}
-.ci .bul i{width:6px;height:6px;border-radius:50%;background:rgba(0,0,0,.35)}
 .ci textarea{flex:1;min-width:0;border:0;background:transparent;resize:none;font-size:20px;line-height:1.5;
   padding:12px 4px;height:54px;overflow:hidden;display:block}
 .ci.done textarea{text-decoration:line-through;text-decoration-thickness:2px;color:rgba(0,0,0,.38)}
-.ci.done .bul i{background:rgba(0,0,0,.18)}
 .ci .x{flex:none;width:40px;height:52px;display:none;place-items:center;color:rgba(0,0,0,.4);font-size:19px}
 .ci.focus .x{display:grid}
 .ci .grip{flex:none;width:36px;height:52px;display:grid;place-items:center;color:rgba(0,0,0,.22);touch-action:none;font-size:18px;letter-spacing:-2px}
 .ci.focus .grip{display:none}
 .ci.dragging{z-index:5;box-shadow:0 6px 18px rgba(0,0,0,.2)}
-.addrow{display:flex;align-items:center;gap:2px;width:100%;padding:0 0 0 12px;height:54px;font-size:19px;color:rgba(0,0,0,.4);text-align:left}
-.addrow span:first-child{width:18px;text-align:center;font-size:22px;margin-right:4px}
+.newidea{position:sticky;top:0;z-index:4;display:flex;align-items:flex-start;gap:4px;padding:8px 10px 8px 8px;
+  background:var(--bg);border-bottom:2px solid var(--hd)}
+.newidea .plus{flex:none;width:30px;height:46px;display:grid;place-items:center;font-size:24px;color:rgba(0,0,0,.4)}
+.newidea textarea{flex:1;min-width:0;border:0;resize:none;font-size:20px;line-height:1.5;padding:9px 12px;height:46px;
+  overflow:hidden;display:block;background:rgba(255,255,255,.6);border-radius:10px}
+.newidea textarea:focus{background:#fff}
+.newidea textarea::placeholder{color:rgba(0,0,0,.35)}
+.newidea .add{flex:none;height:46px;padding:0 14px;border-radius:10px;background:rgba(0,0,0,.72);color:#fff;font-size:16px;display:none}
+.newidea.typing .add{display:block}
 .hint{font-size:13px;color:rgba(0,0,0,.4);text-align:center;padding:14px}
 
 /* keyboard toolbar */
@@ -359,14 +363,14 @@ $('#navMenu').onclick = $('#lMore').onclick = () => {
 
 /* ================= NOTE ================= */
 function newNote(type){
-  const n = { id:uid(), type, title:'', body:'', items: type==='check' ? [{id:uid(),t:'',done:false}] : [],
+  const n = { id:uid(), type, title:'', body:'', items: [],
     color: ui.filter!=='all' ? ui.filter : 'yellow', pinned:false, deleted:false,
     created:Date.now(), updated:Date.now() };
   state.notes.push(n);
   openNote(n);
   setTimeout(() => {
     if (type==='text') $('#eText').focus();
-    else focusItem(n.items[0].id, 0);
+    else focusNew();
   }, 80);
 }
 function openNote(n){
@@ -395,8 +399,44 @@ function paintBody(){
     sizeText();
     return;
   }
+  b.innerHTML = `<div class="newidea" id="newWrap"><span class="plus">＋</span>
+      <textarea id="newIdea" rows="1" enterkeyhint="send" placeholder="新想法…"></textarea>
+      <button class="add" id="newAdd">加入</button></div><div class="cl" id="cl"></div>`;
+  const t = $('#newIdea');
+  t.addEventListener('input', () => { sizeTA(t, 46); $('#newWrap').classList.toggle('typing', !!t.value.trim()); });
+  t.addEventListener('keydown', e => {
+    if (e.key !== 'Enter' || e.isComposing || e.keyCode === 229) return;
+    e.preventDefault();
+    if (!t.value.trim()){ t.blur(); return; }
+    commitNew();
+  });
+  t.addEventListener('paste', e => {
+    const txt = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+    if (!txt.includes('\n')) return;
+    e.preventDefault();
+    const lines = splitLines((t.value ? t.value + '\n' : '') + txt);
+    addTop(lines); t.value = ''; sizeTA(t, 46); $('#newWrap').classList.remove('typing');
+  });
+  $('#newAdd').addEventListener('pointerdown', e => e.preventDefault());
+  $('#newAdd').onclick = commitNew;
   renderChecklist();
 }
+const splitLines = txt => txt.split(/\r?\n/).map(s=>s.replace(/^\s*([-*•□☐✓☑]|\d+[.)、])\s*/,'').trim()).filter(Boolean);
+function addTop(lines){
+  if (!lines.length) return;
+  cur.items = cur.items.filter(i => i.t.trim());
+  cur.items.unshift(...lines.map(t => ({id:uid(), t, done:false})));
+  changed(true); renderChecklist();
+  $('#nbody').scrollTop = 0;
+}
+function commitNew(){
+  const t = $('#newIdea'); const v = t.value.trim();
+  if (!v) return;
+  addTop([v]);
+  t.value = ''; sizeTA(t, 46); $('#newWrap').classList.remove('typing');
+  t.focus();
+}
+function focusNew(){ const t = $('#newIdea'); if (t){ t.focus(); $('#nbody').scrollTop = 0; } }
 function sizeText(){
   const t = $('#eText'); if (!t) return;
   t.style.height = 'auto';
@@ -408,22 +448,20 @@ function itemHTML(it){
   return `<div class="ci ${it.done?'done':''}" data-id="${it.id}">
     <div class="under"><span class="l">${it.done?'恢復':'劃掉'}</span><span class="r">刪除</span></div>
     <div class="cin">
-      <span class="bul"><i></i></span>
-      <textarea rows="1" enterkeyhint="next" placeholder="寫下想法…">${esc(it.t)}</textarea>
+      <textarea rows="1" enterkeyhint="next">${esc(it.t)}</textarea>
       <button class="x" aria-label="刪除這行">✕</button>
       <span class="grip" aria-label="拖曳排序">⋮⋮</span>
     </div>
   </div>`;
 }
 function renderChecklist(){
-  let h = `<div class="cl" id="cl">` + cur.items.map(itemHTML).join('')
-    + `<button class="addrow" id="addItem"><span>＋</span><span>新增一行</span></button>`;
+  let h = cur.items.map(itemHTML).join('');
   let seen = false; try { seen = localStorage.getItem('cn.hint') === '1'; } catch(e){}
   if (!seen && cur.items.some(i=>i.t.trim())) h += `<div class="hint">向右滑＝劃掉／恢復　·　向左滑＝刪除</div>`;
-  $('#nbody').innerHTML = h + `</div>`;
-  $('#nbody').querySelectorAll('.ci textarea').forEach(sizeTA);
+  $('#cl').innerHTML = h;
+  $('#cl').querySelectorAll('.ci textarea').forEach(t => sizeTA(t));
 }
-function sizeTA(t){ t.style.height = '0px'; t.style.height = Math.max(54, t.scrollHeight) + 'px'; }
+function sizeTA(t, min=54){ t.style.height = '0px'; t.style.height = Math.max(min, t.scrollHeight) + 'px'; }
 const findItem = id => cur.items.findIndex(i=>i.id===id);
 function focusItem(id, caret){
   const t = $(`#nbody .ci[data-id="${id}"] textarea`); if (!t) return;
@@ -448,7 +486,6 @@ function toggleStrike(id){
 function removeItem(id){
   const idx = findItem(id); if (idx < 0) return;
   const removed = cur.items.splice(idx,1)[0];
-  if (!cur.items.length) cur.items.push({id:uid(), t:'', done:false});
   changed(true); renderChecklist();
   try { localStorage.setItem('cn.hint','1'); } catch(e){}
   if (removed.t.trim()) toast('已刪除', {label:'復原', fn:()=>{ if(cur){ cur.items.splice(idx,0,removed); changed(true); renderChecklist(); } }});
@@ -456,19 +493,15 @@ function removeItem(id){
 
 $('#nbody').addEventListener('click', e => {
   if (!cur || cur.type!=='check') return;
-  if (e.target.closest('#addItem')) return insertAfter(null);
   const row = e.target.closest('.ci');
   if (row && e.target.closest('.x')){
     const id = row.dataset.id, idx = findItem(id);
     removeItem(id);
-    const next = cur.items[Math.min(idx, cur.items.length-1)]; if (next) focusItem(next.id);
+    const next = cur.items[Math.min(idx, cur.items.length-1)]; if (next) focusItem(next.id); else focusNew();
     return;
   }
-  // tap empty space under the list = new line
-  if (e.target.id === 'cl' || e.target.id === 'nbody' || e.target.classList.contains('hint')){
-    const last = cur.items[cur.items.length-1];
-    if (last && !last.t.trim()) focusItem(last.id); else insertAfter(null);
-  }
+  // tap empty space = jump to the new-idea field
+  if (e.target.id === 'cl' || e.target.id === 'nbody' || e.target.classList.contains('hint')) focusNew();
 });
 $('#nbody').addEventListener('input', e => {
   const row = e.target.closest('.ci'); if (!row || !cur) return;
@@ -498,7 +531,7 @@ $('#nbody').addEventListener('paste', e => {
   const txt = (e.clipboardData || window.clipboardData)?.getData('text') || '';
   if (!txt.includes('\n')) return;
   e.preventDefault();
-  const lines = txt.split(/\r?\n/).map(s=>s.replace(/^\s*([-*•□☐✓☑]|\d+[.)、])\s*/,'').trim()).filter(Boolean);
+  const lines = splitLines(txt);
   if (!lines.length) return;
   const ta = e.target, id = row.dataset.id, it = cur.items[findItem(id)];
   const before = ta.value.slice(0, ta.selectionStart), after = ta.value.slice(ta.selectionEnd);
@@ -529,7 +562,7 @@ document.addEventListener('focusout', () => {
 });
 function cleanupEmpty(){
   const keep = cur.items.filter(i => i.t.trim());
-  if (keep.length !== cur.items.length && keep.length > 0){ cur.items = keep; save(); renderChecklist(); }
+  if (keep.length !== cur.items.length){ cur.items = keep; save(); renderChecklist(); }
 }
 
 /* ---------- swipe: right = strike, left = delete ---------- */
@@ -616,7 +649,7 @@ $('#nTitle').addEventListener('keydown', e => {
   if (e.key !== 'Enter' || e.isComposing || e.keyCode===229) return;
   e.preventDefault();
   if (cur.type==='text'){ const t=$('#eText'); t.focus(); t.setSelectionRange(0,0); }
-  else { const first = cur.items.find(i=>!i.done); first ? focusItem(first.id) : insertAfter(null); }
+  else focusNew();
 });
 
 /* ---------- keyboard bar (follows the iOS keyboard) ---------- */
@@ -687,9 +720,10 @@ $('#hMore').onclick = () => {
   const rows = [];
   rows.push({label: cur.pinned ? '取消釘選' : '釘選到最上方', fn:()=>{ cur.pinned=!cur.pinned; touch(); toast(cur.pinned?'已釘選':'已取消釘選'); }});
   rows.push({label: cur.type==='text' ? '轉為清單（每行一條）' : '轉為文字', fn:convert});
+  if (cur.type==='check' && cur.items.length > 1) rows.push({label:'上下順序反轉', fn:()=>{ cur.items.reverse(); changed(true); renderChecklist(); }});
   if (cur.type==='check' && cur.items.some(i=>i.done)){
     rows.push({label:'全部恢復（取消劃線）', fn:()=>{ cur.items.forEach(i=>i.done=false); changed(true); renderChecklist(); }});
-    rows.push({label:'清掉劃掉的行', fn:()=>{ cur.items = cur.items.filter(i=>!i.done); if(!cur.items.length) cur.items=[{id:uid(),t:'',done:false}]; changed(true); renderChecklist(); }});
+    rows.push({label:'清掉劃掉的行', fn:()=>{ cur.items = cur.items.filter(i=>!i.done); changed(true); renderChecklist(); }});
   }
   rows.push({label:'分享', fn:()=>{
     const txt = (cur.title ? cur.title+'\n\n' : '') + plain(cur);
@@ -715,7 +749,6 @@ $('#hMore').onclick = () => {
 function convert(){
   if (cur.type==='text'){
     cur.items = cur.body.split('\n').map(s=>s.trim()).filter(Boolean).map(t=>({id:uid(),t,done:false}));
-    if (!cur.items.length) cur.items = [{id:uid(),t:'',done:false}];
     cur.type = 'check';
   } else {
     cur.body = cur.items.filter(i=>i.t.trim()).map(i=>i.t).join('\n');
