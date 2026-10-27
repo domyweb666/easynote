@@ -49,11 +49,42 @@ svg{display:block}
 .row .rd svg{width:20px;height:20px;flex:none}
 .row .prog{font-size:13px;color:#777}
 .empty{text-align:center;color:var(--muted);padding:56px 20px;line-height:1.8}
-.empty svg{width:150px;height:auto;margin:0 auto 10px}
-.fab{position:fixed;right:16px;bottom:calc(var(--safe-b) + 74px);width:66px;height:78px;
-  display:grid;place-items:center;z-index:6;filter:drop-shadow(0 4px 8px rgba(60,30,80,.30))}
-.fab svg{width:66px;height:78px}
-.fab:active{transform:scale(.93)}
+.empty img{display:block;width:min(230px,62%);height:auto;margin:0 auto 8px}
+.fab{position:fixed;right:14px;bottom:calc(var(--safe-b) + 72px);width:66px;height:86px;
+  display:grid;place-items:center;z-index:6;filter:drop-shadow(0 5px 8px rgba(60,30,80,.28));transition:transform .12s}
+.fab img{width:58px;height:auto;display:block}
+.fab .plus{position:absolute;right:0;bottom:8px;width:28px;height:28px;border-radius:50%;background:var(--stem);color:#fff;
+  display:grid;place-items:center;border:2.5px solid #fff}
+.fab .plus svg{width:16px;height:16px}
+.fab:active{transform:scale(.92)}
+
+/* ---- bloom / harvest pop ---- */
+.pop{position:fixed;z-index:40;pointer-events:none;height:auto;animation:popup 1.15s cubic-bezier(.2,.8,.3,1) forwards}
+.pop.f{width:34px}
+.pop.e{width:40px}
+@keyframes popup{
+  0%{transform:translateY(8px) scale(.2);opacity:0}
+  22%{transform:translateY(-4px) scale(1.18);opacity:1}
+  36%{transform:translateY(0) scale(1)}
+  75%{transform:translateY(-22px) scale(1);opacity:1}
+  100%{transform:translateY(-38px) scale(.9);opacity:0}}
+
+/* ---- garden ---- */
+.garden{position:fixed;inset:0;z-index:30;background:var(--app);overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:calc(var(--safe-t) + 4px) 0 calc(var(--safe-b) + 24px)}
+.ghead{display:flex;align-items:center;gap:4px;padding:6px 6px 0}
+.ghead h2{flex:1;margin:0;font-size:24px;font-weight:600;color:var(--egg)}
+.field{position:relative;width:100%;aspect-ratio:941/800;background:url(img/field.webp) center/100% 100% no-repeat}
+.field img{position:absolute;width:8%;height:auto;transform:translate(-50%,-90%);filter:drop-shadow(0 2px 2px rgba(60,30,20,.25))}
+.field .sign{position:absolute;left:79.5%;top:9.6%;transform:translate(-50%,-50%) rotate(4deg);font-size:13px;font-weight:700;
+  color:#6B4423;white-space:nowrap;text-align:center;line-height:1.15}
+.gstats{display:flex;gap:10px;padding:4px 16px 0}
+.gstat{flex:1;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 10px;display:flex;align-items:center;gap:10px}
+.gstat img{width:34px;height:auto;flex:none}
+.gstat b{display:block;font-size:24px;color:var(--egg);line-height:1.1}
+.gstat span{font-size:13px;color:var(--muted)}
+.gnote{margin:14px 22px 0;font-size:14px;line-height:1.8;color:var(--muted);text-align:center}
+.gtotal{margin:10px 22px 0;font-size:13px;color:var(--muted);text-align:center}
 .bnav{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--bar);border-top:1px solid var(--line);
   display:flex;padding-bottom:var(--safe-b)}
 .bnav button{flex:1;height:60px;display:grid;place-items:center;color:#9A8F9E}
@@ -185,32 +216,15 @@ const I = {
   notes:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3h12a2 2 0 0 1 2 2v15a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm2 5v2h8V8H8zm0 4v2h8v-2H8zm0 4v2h5v-2H8zM7 1h2v4H7zm4 0h2v4h-2zm4 0h2v4h-2z"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>',
   trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>',
+  close:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
   menu:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>',
   undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 6 6v1"/></svg>',
   redo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0-6 6v1"/></svg>',
 };
 
-/* ---------------- eggplant art ---------------- */
-let eggN = 0;
-function egg(mood){
-  const g = 'eg' + (eggN++);
-  const eyes = {
-    calm:  '<circle cx="50" cy="92" r="4.6" fill="#2A2230"/><circle cx="74" cy="92" r="4.6" fill="#2A2230"/>',
-    happy: '<path d="M45 93q5-6 10 0M69 93q5-6 10 0" stroke="#2A2230" stroke-width="3.4" fill="none" stroke-linecap="round"/>',
-    sleep: '<path d="M45 92q5 4 10 0M69 92q5 4 10 0" stroke="#2A2230" stroke-width="3.2" fill="none" stroke-linecap="round"/>',
-  }[mood] || '';
-  return `<defs>
-   <radialGradient id="${g}b" cx="38%" cy="35%" r="75%"><stop offset="0" stop-color="#9C78BE"/><stop offset=".55" stop-color="#6E4A8C"/><stop offset="1" stop-color="#4E3266"/></radialGradient>
-   <radialGradient id="${g}c" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="#9DBB6E"/><stop offset="1" stop-color="#5E7A33"/></radialGradient></defs>
-  <path d="M62 34C88 34 104 64 104 94C104 120 86 136 62 136C38 136 20 120 20 95C20 68 36 46 48 38C52 35 57 34 62 34Z" fill="url(#${g}b)"/>
-  <ellipse cx="44" cy="62" rx="9" ry="14" fill="#fff" opacity=".22" transform="rotate(25 44 62)"/>
-  <path d="M58 8q4-2 8 0l-1 22h-6z" fill="#5E7A33"/>
-  <path d="M62 24C50 24 37 31 33 46C42 40 49 41 53 47C56 40 68 40 71 47C75 41 82 40 91 46C87 31 74 24 62 24Z" fill="url(#${g}c)"/>
-  ${eyes}${mood ? '<ellipse cx="41" cy="103" rx="6.5" ry="4" fill="#F4A7B9" opacity=".75"/><ellipse cx="83" cy="103" rx="6.5" ry="4" fill="#F4A7B9" opacity=".75"/>' : ''}`;
-}
-const basket = '<g transform="translate(120 96)"><path d="M0 8h64l-9 38H9z" fill="#C99A63"/><path d="M4 22h56M7 34h50" stroke="#A97A46" stroke-width="3"/><path d="M14 8V46M32 8V46M50 8V46" stroke="#A97A46" stroke-width="2.5" opacity=".7"/><rect x="-3" y="2" width="70" height="9" rx="4.5" fill="#B58550"/><path d="M14 4C14-16 50-16 50 4" stroke="#B58550" stroke-width="5" fill="none"/></g>';
-const emptyArt = mood => `<svg viewBox="0 0 196 146" xmlns="http://www.w3.org/2000/svg"><ellipse cx="98" cy="139" rx="86" ry="6" fill="#000" opacity=".07"/>${mood==='sleep' ? '<g transform="translate(36 0)">'+egg(mood)+'</g>' : egg(mood)+basket}</svg>`;
-const fabArt = () => `<svg viewBox="14 0 96 140" xmlns="http://www.w3.org/2000/svg">${egg('')}<path d="M62 70v40M42 90h40" stroke="#fff" stroke-width="7" stroke-linecap="round"/></svg>`;
+/* ---------------- art ---------------- */
+const IMG = n => `img/${n}.webp`;
+const emptyArt = n => `<img src="${IMG(n)}" alt="">`;
 
 /* ---------------- colors ---------------- */
 const COLORS = {
@@ -237,16 +251,26 @@ const p2 = x => String(x).padStart(2,'0');
 
 function fixNote(n){
   if (!COLORS[n.color]) n.color = n.color==='pink' ? 'red' : 'yellow';
-  n.items = (n.items||[]).map(i => ({ id: i.id || uid(), t: i.t || '', done: !!i.done }));
+  n.items = (n.items||[]).map(i => ({ id: i.id || uid(), t: i.t || '', done: !!i.done, b: i.b === undefined ? true : !!i.b }));
   n.title = n.title || ''; n.body = n.body || '';
+  n.b = n.b === undefined ? true : !!n.b;
   return n;
+}
+/* garden: days['YYYY-MM-DD'] = {f: flowers, e: eggplants, g: golden}; tot = all-time */
+function fixGarden(s){
+  if (s.garden && s.garden.days && s.garden.tot) return;
+  // first run: count what already exists so past ideas aren't lost
+  const live = s.notes.filter(n=>!n.deleted);
+  const items = live.flatMap(n=>n.items);
+  s.garden = { days:{}, tot:{ f: items.filter(i=>i.t.trim()).length + live.filter(n=>n.type==='text'&&n.body.trim()).length,
+                               e: items.filter(i=>i.done).length } };
 }
 function load(){
   try {
     const s = JSON.parse(localStorage.getItem(KEY));
-    if (s && Array.isArray(s.notes)){ s.notes.forEach(fixNote); return s; }
+    if (s && Array.isArray(s.notes)){ s.notes.forEach(fixNote); fixGarden(s); return s; }
   } catch(e){}
-  return { notes: [], sort:'updated' };
+  return { notes: [], sort:'updated', garden:{ days:{}, tot:{f:0,e:0} } };
 }
 let state = load();
 let ui = { view:'notes', filter:'all', q:'', searching:false, sort: state.sort || 'updated' };
@@ -282,7 +306,7 @@ const label = n => n.title.trim() || (n.type==='text' ? n.body : n.items.map(i=>
 const isEmpty = n => !n.title.trim() && (n.type==='text' ? !n.body.trim() : n.items.every(i=>!i.t.trim()));
 
 /* ---------------- static icons ---------------- */
-$('#lMore').innerHTML = I.dots; $('#fab').innerHTML = fabArt();
+$('#lMore').innerHTML = I.dots; $('#fab').innerHTML = `<img src="${IMG('face-happy')}" alt=""><span class="plus">${I.plus}</span>`;
 $('#navNotes').innerHTML = I.notes; $('#navSearch').innerHTML = I.search;
 $('#navTrash').innerHTML = I.trash; $('#navMenu').innerHTML = I.menu;
 $('#hBack').innerHTML = I.back; $('#hMore').innerHTML = I.dots;
@@ -324,8 +348,8 @@ function renderList(){
     el.innerHTML = trash
       ? `<div class="empty">${emptyArt('sleep')}垃圾桶是空的<br>茄子在睡覺</div>`
       : (q||ui.filter!=='all')
-        ? `<div class="empty">${emptyArt('calm')}找不到符合的筆記</div>`
-        : `<div class="empty">${emptyArt('happy')}菜籃還是空的<br>點右下角的茄子，寫下第一個想法</div>`;
+        ? `<div class="empty">${emptyArt('search')}找不到符合的筆記</div>`
+        : `<div class="empty">${emptyArt('basket')}菜籃還是空的<br>點右下角的茄子，寫下第一個想法</div>`;
     return;
   }
   el.innerHTML = notes.map(n => {
@@ -376,6 +400,7 @@ $('#navMenu').onclick = $('#lMore').onclick = () => {
     ]);
   }
   sheet([
+    {label:'茄子田', fn:openGarden},
     {label:'匯出備份', fn:exportData},
     {label:'匯入備份', fn:()=>$('#importFile').click()},
     {label:`共 ${state.notes.filter(n=>!n.deleted).length} 則筆記`, fn:()=>{}},
@@ -386,7 +411,7 @@ $('#navMenu').onclick = $('#lMore').onclick = () => {
 function newNote(type){
   const n = { id:uid(), type, title:'', body:'', items: [],
     color: ui.filter!=='all' ? ui.filter : 'purple', pinned:false, deleted:false,
-    created:Date.now(), updated:Date.now() };
+    created:Date.now(), updated:Date.now(), b:false };
   state.notes.push(n);
   openNote(n);
   setTimeout(() => {
@@ -427,14 +452,14 @@ const splitLines = txt => txt.split(/\r?\n/).map(s=>s.replace(/^\s*([-*•□☐
 function addTop(lines){
   if (!lines.length) return;
   cur.items = cur.items.filter(i => i.t.trim());
-  cur.items.unshift(...lines.map(t => ({id:uid(), t, done:false})));
+  cur.items.unshift(...lines.map(t => ({id:uid(), t, done:false, b:false})));
   changed(true); renderChecklist();
   $('#nbody').scrollTop = 0;
 }
 function focusNew(){
   const first = cur.items[0];
   if (first && !first.t.trim()){ focusItem(first.id); return; }
-  const n = {id:uid(), t:'', done:false};
+  const n = {id:uid(), t:'', done:false, b:false};
   cur.items.unshift(n); changed(); renderChecklist();
   $('#nbody').scrollTop = 0; focusItem(n.id, 0);
 }
@@ -458,7 +483,7 @@ function itemHTML(it){
 function renderChecklist(){
   let h = cur.items.map(itemHTML).join('');
   let seen = false; try { seen = localStorage.getItem('cn.hint') === '1'; } catch(e){}
-  if (!seen && cur.items.some(i=>i.t.trim())) h += `<div class="hint">向右滑＝劃掉／恢復　·　向左滑＝刪除</div>`;
+  if (!seen && cur.items.some(i=>i.t.trim())) h += `<div class="hint">向右滑＝劃掉，結一顆茄子　·　向左滑＝刪除</div>`;
   $('#cl').innerHTML = h;
   $('#cl').querySelectorAll('.ci textarea').forEach(t => sizeTA(t));
 }
@@ -472,16 +497,52 @@ function focusItem(id, caret){
   t.closest('.ci').scrollIntoView({block:'nearest'});
 }
 function insertAfter(id, text='', focus=true){
-  const n = {id:uid(), t:text, done:false};
+  const n = {id:uid(), t:text, done:false, b:false};
   const idx = id == null ? cur.items.length - 1 : findItem(id);
   cur.items.splice(idx+1, 0, n);
   changed(); renderChecklist();
   if (focus) focusItem(n.id, 0);
+  bloomCheck(true, n.id);
   return n;
+}
+const dayKey = (d=new Date()) => `${d.getFullYear()}-${p2(d.getMonth()+1)}-${p2(d.getDate())}`;
+function gday(k=dayKey()){ return state.garden.days[k] || (state.garden.days[k] = {f:0,e:0,g:0}); }
+function pop(id, kind){
+  const row = $(`#nbody .ci[data-id="${id}"]`); if (!row) return;
+  const r = row.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+  const im = document.createElement('img');
+  im.src = IMG(kind==='f' ? 'flower' : kind==='g' ? 'egg-gold' : 'egg-small');
+  im.className = 'pop ' + (kind==='f' ? 'f' : 'e');
+  im.style.left = (r.right - (kind==='f' ? 50 : 58)) + 'px';
+  im.style.top = (r.top + r.height/2 - (kind==='f' ? 20 : 30)) + 'px';
+  document.body.appendChild(im);
+  setTimeout(() => im.remove(), 1200);
+}
+// an idea "blooms" the first time it is left with text in it
+function bloomCheck(anim, skipId){
+  if (!cur) return;
+  let n = 0;
+  if (cur.type === 'text'){
+    if (!cur.b && cur.body.trim()){ cur.b = true; n++; }
+  } else cur.items.forEach(it => {
+    if (!it.b && it.t.trim() && it.id !== skipId){ it.b = true; n++; if (anim) pop(it.id, 'f'); }
+  });
+  if (n){ gday().f += n; state.garden.tot.f += n; save(); }
+}
+function harvest(on){
+  const d = gday(), t = state.garden.tot;
+  if (on){ t.e++; d.e++; if (t.e % 10 === 0){ d.g++; return 'g'; } return 'e'; }
+  // un-striking only takes back an eggplant picked today, never an old one
+  if (d.e > 0){ if (t.e % 10 === 0 && d.g > 0) d.g--; d.e--; t.e--; }
+  return null;
 }
 function toggleStrike(id){
   const it = cur.items[findItem(id)]; if (!it || !it.t.trim()) return;
-  it.done = !it.done; changed(true); renderChecklist();
+  it.done = !it.done;
+  const kind = harvest(it.done);
+  if (!it.b){ it.b = true; gday().f++; state.garden.tot.f++; }
+  changed(true); renderChecklist();
+  if (kind) pop(id, kind);
   try { localStorage.setItem('cn.hint','1'); } catch(e){}
 }
 function removeItem(id){
@@ -540,7 +601,7 @@ $('#nbody').addEventListener('paste', e => {
   it.t = before + lines[0];
   let prevId = id;
   for (let k=1;k<lines.length;k++){
-    const n = {id:uid(), t:lines[k], done:false};
+    const n = {id:uid(), t:lines[k], done:false, b:false};
     cur.items.splice(findItem(prevId)+1, 0, n); prevId = n.id;
   }
   const last = cur.items[findItem(prevId)], caret = last.t.length; last.t += after;
@@ -550,6 +611,7 @@ $('#nbody').addEventListener('paste', e => {
 document.addEventListener('focusin', e => {
   document.querySelectorAll('.ci.focus').forEach(r=>r.classList.remove('focus'));
   const r = e.target.closest && e.target.closest('.ci'); if (r) r.classList.add('focus');
+  if (cur && cur.type==='check') bloomCheck(true, r ? r.dataset.id : null);
   if (cur && (e.target.tagName==='TEXTAREA' || e.target.id==='nTitle')) showKbar(true);
 });
 document.addEventListener('focusout', () => {
@@ -558,7 +620,7 @@ document.addEventListener('focusout', () => {
     if (!a || !(a.tagName==='TEXTAREA' || a.tagName==='INPUT')){
       document.querySelectorAll('.ci.focus').forEach(r=>r.classList.remove('focus'));
       showKbar(false);
-      if (cur && cur.type==='check') cleanupEmpty();
+      if (cur && cur.type==='check'){ bloomCheck(true); cleanupEmpty(); }
     }
   }, 120);
 });
@@ -697,6 +759,7 @@ function closeNote(){
   if (!cur) return;
   document.activeElement?.blur();
   clearTimeout(histTimer);
+  bloomCheck(false);
   if (cur.type==='check') cur.items = cur.items.filter(i=>i.t.trim());
   if (isEmpty(cur)) state.notes = state.notes.filter(n=>n!==cur);
   save(); cur = null;
@@ -750,7 +813,7 @@ $('#hMore').onclick = () => {
 };
 function convert(){
   if (cur.type==='text'){
-    cur.items = cur.body.split('\n').map(s=>s.trim()).filter(Boolean).map(t=>({id:uid(),t,done:false}));
+    cur.items = cur.body.split('\n').map(s=>s.trim()).filter(Boolean).map(t=>({id:uid(),t,done:false,b:!!cur.b}));
     cur.type = 'check';
   } else {
     cur.body = cur.items.filter(i=>i.t.trim()).map(i=>i.t).join('\n');
@@ -758,6 +821,39 @@ function convert(){
   }
   changed(true); paintBody(); paintMeta();
   toast(cur.type==='check' ? '已轉為清單' : '已轉為文字');
+}
+
+/* ================= garden ================= */
+// soil-ridge slots on img/field.webp (941x800), back ridge first so front ones overlap correctly
+const RIDGES = [[600,170,800,440],[460,230,660,480],[320,280,530,530],[190,340,390,590]];
+const SLOTS = RIDGES.flatMap(([x1,y1,x2,y2]) => [0.1,0.26,0.42,0.58,0.74,0.9].map(t => [x1+(x2-x1)*t, y1+(y2-y1)*t]));
+function weekKeys(){
+  const d = new Date(); const back = (d.getDay()+6)%7;        // Monday-start week
+  return [...Array(back+1)].map((_,i) => { const x = new Date(d); x.setDate(d.getDate()-back+i); return dayKey(x); });
+}
+function openGarden(){
+  const days = state.garden.days, today = dayKey();
+  let f = 0, eggs = [];
+  weekKeys().forEach(k => { const d = days[k]; if (!d) return; f += d.f;
+    for (let i=0;i<d.e;i++) eggs.push(i < d.g ? 'egg-gold' : k===today ? 'egg-small' : 'egg'); });
+  const shown = eggs.slice(0, SLOTS.length);
+  const imgs = shown.map((n,i) => [n, SLOTS[i]]).sort((a,b) => a[1][1]-b[1][1])
+    .map(([n,[x,y]]) => `<img src="${IMG(n)}" style="left:${x/941*100}%;top:${y/800*100}%" alt="">`).join('');
+  const more = eggs.length - shown.length;
+  const t = state.garden.tot;
+  const host = overlay(`<div class="garden">
+    <div class="ghead"><h2>茄子田</h2><button class="ib" id="gClose" aria-label="關閉">${I.close}</button></div>
+    <div class="field">${imgs}<div class="sign">本週<br>${eggs.length} 顆</div></div>
+    <div class="gstats">
+      <div class="gstat"><img src="${IMG('flower')}" alt=""><div><b>${f}</b><span>本週開的花</span></div></div>
+      <div class="gstat"><img src="${IMG('egg')}" alt=""><div><b>${eggs.length}</b><span>本週結的茄子</span></div></div>
+    </div>
+    <p class="gnote">${eggs.length
+      ? (more>0 ? `田裡種不下了，還有 ${more} 顆收在籃子裡。<br>` : '') + '每一顆茄子，都是一個你想完、放下的念頭。'
+      : '這週的田還空著。<br>記下一個想法會開一朵花，<br>在清單裡往右滑劃掉它，就會結出一顆茄子。'}</p>
+    <p class="gtotal">到目前為止：${t.f} 朵花　·　${t.e} 顆茄子</p>
+  </div>`);
+  $('#gClose').onclick = closeOverlay;
 }
 
 /* ================= overlays ================= */
@@ -792,7 +888,7 @@ function toast(msg, action){
 
 /* ================= backup ================= */
 function exportData(){
-  const data = JSON.stringify({app:'colornotes', version:1, exported:Date.now(), notes:state.notes}, null, 1);
+  const data = JSON.stringify({app:'colornotes', version:1, exported:Date.now(), notes:state.notes, garden:state.garden}, null, 1);
   const d = new Date(), name = `茄記備份-${d.getFullYear()}${p2(d.getMonth()+1)}${p2(d.getDate())}.json`;
   const file = new File([data], name, {type:'application/json'});
   if (navigator.canShare && navigator.canShare({files:[file]})) navigator.share({files:[file]}).catch(()=>{});
@@ -806,6 +902,14 @@ $('#importFile').onchange = async e => {
     for (const n0 of data.notes){
       const n = fixNote(n0), h = have.get(n.id);
       if (!h){ state.notes.push(n); a++; } else if (n.updated > h.updated){ Object.assign(h,n); u++; }
+    }
+    if (data.garden && data.garden.days){                       // keep the bigger count per day
+      const g = state.garden;
+      for (const [k,d] of Object.entries(data.garden.days)){
+        const m = g.days[k] || (g.days[k] = {f:0,e:0,g:0});
+        m.f = Math.max(m.f, d.f||0); m.e = Math.max(m.e, d.e||0); m.g = Math.max(m.g, d.g||0);
+      }
+      g.tot.f = Math.max(g.tot.f, data.garden.tot?.f||0); g.tot.e = Math.max(g.tot.e, data.garden.tot?.e||0);
     }
     save(); renderList(); toast(`匯入完成：新增 ${a}、更新 ${u}`);
   } catch { toast('這個檔案不是茄記備份'); }
