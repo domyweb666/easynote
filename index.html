@@ -49,7 +49,8 @@ svg{display:block}
 .row .rd svg{width:20px;height:20px;flex:none}
 .row .prog{font-size:13px;color:#777}
 .empty{text-align:center;color:var(--muted);padding:56px 20px;line-height:1.8}
-.empty img{display:block;width:min(230px,62%);height:auto;margin:0 auto 8px}
+.empty img{display:block;width:min(230px,62%);height:auto;margin:0 auto 8px;animation:breathe 3.8s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-7px) scale(1.012)}}
 .fab{position:fixed;right:14px;bottom:calc(var(--safe-b) + 72px);width:66px;height:86px;
   display:grid;place-items:center;z-index:6;filter:drop-shadow(0 5px 8px rgba(60,30,80,.28));transition:transform .12s}
 .fab img{width:58px;height:auto;display:block}
@@ -75,7 +76,22 @@ svg{display:block}
 .ghead{display:flex;align-items:center;gap:4px;padding:6px 6px 0}
 .ghead h2{flex:1;margin:0;font-size:24px;font-weight:600;color:var(--egg)}
 .field{position:relative;width:100%;aspect-ratio:941/800;background:url(img/field.webp) center/100% 100% no-repeat}
-.field img{position:absolute;width:8%;height:auto;transform:translate(-50%,-90%);filter:drop-shadow(0 2px 2px rgba(60,30,20,.25))}
+.field img{position:absolute;width:8%;height:auto;transform:translate(-50%,-90%);filter:drop-shadow(0 2px 2px rgba(60,30,20,.25));
+  animation:drop .75s cubic-bezier(.35,.6,.45,1) both}
+@keyframes drop{
+  0%{transform:translate(-50%,-420%);opacity:0}
+  45%{opacity:1}
+  62%{transform:translate(-50%,-84%) scale(1.08,.9)}
+  78%{transform:translate(-50%,-104%) scale(.97,1.04)}
+  100%{transform:translate(-50%,-90%) scale(1)}}
+#basket{position:fixed;right:16px;bottom:calc(var(--safe-b) + 18px);width:64px;height:auto;z-index:41;pointer-events:none;
+  opacity:0;transform:translateY(16px) scale(.85);transition:opacity .22s,transform .25s cubic-bezier(.3,1.4,.5,1);
+  filter:drop-shadow(0 4px 6px rgba(60,30,20,.25))}
+#basket.on{opacity:1;transform:none}
+.fly{position:fixed;z-index:42;width:40px;height:auto;pointer-events:none;left:0;top:0}
+@media (prefers-reduced-motion: reduce){
+  .empty img,.field img{animation:none}
+}
 .field .sign{position:absolute;left:79.5%;top:9.6%;transform:translate(-50%,-50%) rotate(4deg);font-size:13px;font-weight:700;
   color:#6B4423;white-space:nowrap;text-align:center;line-height:1.15}
 .gstats{display:flex;gap:10px;padding:4px 16px 0}
@@ -203,6 +219,7 @@ svg{display:block}
 </div>
 
 <div id="overlay"></div>
+<img id="basket" src="img/basket-only.webp" alt="">
 <input type="file" id="importFile" accept="application/json,.json" class="hidden">
 
 <script>
@@ -518,6 +535,39 @@ function pop(id, kind){
   document.body.appendChild(im);
   setTimeout(() => im.remove(), 1200);
 }
+// a picked eggplant arcs down into a little basket in the corner
+const calm = matchMedia('(prefers-reduced-motion: reduce)');
+let basketT;
+function toBasket(id, kind){
+  if (calm.matches) return pop(id, kind);
+  const row = $(`#nbody .ci[data-id="${id}"]`); if (!row) return;
+  const r = row.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
+  const bk = $('#basket');
+  bk.classList.add('on'); clearTimeout(basketT);
+  // basket mouth, from its resting place (ignore the slide-in transform)
+  const bx = innerWidth - 16 - bk.offsetWidth/2;
+  const by = innerHeight - parseFloat(getComputedStyle(bk).bottom) - bk.offsetHeight + bk.offsetHeight*.45;
+  const sx = r.right - 58, sy = r.top + r.height/2 - 30;            // start beside the row
+  const im = document.createElement('img');
+  im.src = IMG(kind==='g' ? 'egg-gold' : 'egg-small'); im.className = 'fly';
+  document.body.appendChild(im);
+  const tx = bx - sx - 20, ty = by - sy - 40, frames = [];
+  frames.push({transform:`translate(${sx}px,${sy+8}px) scale(.2)`, opacity:0, offset:0});
+  frames.push({transform:`translate(${sx}px,${sy-6}px) scale(1.18)`, opacity:1, offset:.16});
+  frames.push({transform:`translate(${sx}px,${sy}px) scale(1)`, opacity:1, offset:.28});
+  for (let k=1;k<=8;k++){
+    const u = k/8, lift = 90*Math.sin(Math.PI*u)*(1-u*.4);
+    frames.push({transform:`translate(${sx+tx*u}px,${sy+ty*u*u - lift}px) rotate(${u*200}deg) scale(${1-.35*u})`,
+      opacity: k===8 ? 0 : 1, offset:.28 + .72*u});
+  }
+  const a = im.animate(frames, {duration:1050, easing:'linear'});
+  a.onfinish = () => {
+    im.remove();
+    bk.animate([{transform:'scale(1)'},{transform:'scale(1.16,.82)'},{transform:'scale(.95,1.06)'},{transform:'scale(1)'}],
+      {duration:380, easing:'ease-out'});
+    basketT = setTimeout(() => bk.classList.remove('on'), 1300);
+  };
+}
 // an idea "blooms" the first time it is left with text in it
 function bloomCheck(anim, skipId){
   if (!cur) return;
@@ -542,7 +592,7 @@ function toggleStrike(id){
   const kind = harvest(it.done);
   if (!it.b){ it.b = true; gday().f++; state.garden.tot.f++; }
   changed(true); renderChecklist();
-  if (kind) pop(id, kind);
+  if (kind) toBasket(id, kind);
   try { localStorage.setItem('cn.hint','1'); } catch(e){}
 }
 function removeItem(id){
@@ -762,7 +812,7 @@ function closeNote(){
   bloomCheck(false);
   if (cur.type==='check') cur.items = cur.items.filter(i=>i.t.trim());
   if (isEmpty(cur)) state.notes = state.notes.filter(n=>n!==cur);
-  save(); cur = null;
+  save(); cur = null; $('#basket').classList.remove('on');
   $('#noteView').classList.add('hidden'); $('#kbar').classList.add('hidden');
   $('#nbody').innerHTML = '';
   document.querySelector('meta[name=theme-color]').content = '#F7F1E8';
@@ -837,8 +887,8 @@ function openGarden(){
   weekKeys().forEach(k => { const d = days[k]; if (!d) return; f += d.f;
     for (let i=0;i<d.e;i++) eggs.push(i < d.g ? 'egg-gold' : k===today ? 'egg-small' : 'egg'); });
   const shown = eggs.slice(0, SLOTS.length);
-  const imgs = shown.map((n,i) => [n, SLOTS[i]]).sort((a,b) => a[1][1]-b[1][1])
-    .map(([n,[x,y]]) => `<img src="${IMG(n)}" style="left:${x/941*100}%;top:${y/800*100}%" alt="">`).join('');
+  const imgs = shown.map((n,i) => [n, SLOTS[i], i]).sort((a,b) => a[1][1]-b[1][1])
+    .map(([n,[x,y],i]) => `<img src="${IMG(n)}" style="left:${x/941*100}%;top:${y/800*100}%;animation-delay:${200+Math.min(i*75, 1500)}ms" alt="">`).join('');
   const more = eggs.length - shown.length;
   const t = state.garden.tot;
   const host = overlay(`<div class="garden">
